@@ -27,36 +27,37 @@
     .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
     .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
 
-    /* GRID E CARDS */
+    /* GRID */
     .categoryBlock { margin-bottom: 40px; }
     .categoryHeading { font-size: 24px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
     .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
     .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; }
-    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; transition: transform 0.2s; }
-    .productImage:hover { transform: scale(1.02); }
+    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; }
     .card__body { padding: 14px; flex-grow: 1; display: flex; flex-direction: column; }
     .card__title { margin: 0 0 10px; font-size: 18px; }
-    .card__meta { display: flex; justify-content: space-between; margin-top: auto; margin-bottom: 14px; color: var(--muted); }
     .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-    /* MODAL PADRÃO (ADMIN) */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    /* MODAIS */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
     .modal.active { display: flex; }
-    .modal__content { width: min(500px, 92vw); max-height: 90vh; overflow-y: auto; background: #111827; border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+    .modal__content { width: min(450px, 100%); background: #111827; border-radius: 20px; padding: 25px; border: 1px solid var(--border); position: relative; }
     
-    /* MODAL PREVIEW DA FOTO */
-    #previewModal { background: rgba(0,0,0,.9); cursor: zoom-out; }
-    #previewModal img { max-width: 95%; max-height: 95%; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    /* PREVIEW ESPECÍFICO */
+    #previewModal { background: rgba(0,0,0,.95); cursor: zoom-out; }
+    #previewModal img { max-width: 100%; max-height: 90vh; border-radius: 8px; object-fit: contain; }
 
-    .formGroup { margin-bottom: 14px; }
-    .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); }
-    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; }
-    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .formGroup { margin-bottom: 15px; }
+    .formGroup label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 14px; }
+    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; outline: none; }
+    .formGroup input:focus { border-color: var(--accent); }
+    
+    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .closeBtn { width: 100%; border: none; background: #374151; color: white; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
     
-    .adminItem { display: flex; gap: 10px; align-items: center; background: #0f172a; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-    .adminItem img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
-    .dangerBtn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    #adminList { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+    .adminItem { display: flex; gap: 10px; align-items: center; background: #0f172a; padding: 8px; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
+    .adminItem img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
+    .dangerBtn { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
     @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
   </style>
@@ -66,7 +67,7 @@
   <header class="topbar">
     <div class="container topbar__inner">
       <h1 class="brand">Kn2 Personalizados</h1>
-      <button class="adminBtn" id="openAdminBtn">Admin</button>
+      <button class="adminBtn" id="openLoginBtn">Admin</button>
     </div>
   </header>
 
@@ -75,9 +76,21 @@
     <section id="catalogContainer"></section>
   </main>
 
+  <div class="modal" id="loginModal">
+    <div class="modal__content">
+      <h2 style="margin-top:0">Acesso Restrito</h2>
+      <div class="formGroup">
+        <label>Senha do Administrador</label>
+        <input type="password" id="adminPassInput" placeholder="Digite a senha...">
+      </div>
+      <button class="saveBtn" id="doLoginBtn">Entrar</button>
+      <button class="closeBtn" onclick="closeModal('loginModal')">Cancelar</button>
+    </div>
+  </div>
+
   <div class="modal" id="adminModal">
     <div class="modal__content">
-      <h2>Painel Admin</h2>
+      <h2 style="margin-top:0">Novo Produto</h2>
       <div class="formGroup">
         <label>Nome do Produto</label>
         <input type="text" id="pTitle">
@@ -87,40 +100,58 @@
         <input type="text" id="pCategory" placeholder="Ex: Canecas">
       </div>
       <div class="formGroup">
-        <label>Preço</label>
+        <label>Preço (R$)</label>
         <input type="number" id="pPrice" step="0.01">
       </div>
       <div class="formGroup">
-        <label>Nome do Arquivo (na pasta /imagens)</label>
-        <input type="text" id="pFileName" placeholder="ex: caneca_azul.jpg">
+        <label>Nome do Arquivo na pasta /imagens</label>
+        <input type="text" id="pFileName" placeholder="ex: foto1.jpg">
       </div>
-      <button class="saveBtn" id="saveBtn">Salvar Produto</button>
-      <hr style="opacity: 0.1; margin: 20px 0;">
+      <button class="saveBtn" id="saveBtn">Salvar no Catálogo</button>
+      
       <div id="adminList"></div>
-      <button class="closeBtn" id="closeAdminBtn">Fechar</button>
+      
+      <button class="closeBtn" onclick="closeModal('adminModal')">Sair do Painel</button>
     </div>
   </div>
 
-  <div class="modal" id="previewModal" onclick="closePreview()">
-    <img id="imgFull" src="" alt="Preview">
+  <div class="modal" id="previewModal" onclick="closeModal('previewModal')">
+    <img id="imgFull" src="">
   </div>
 
   <script>
     const WHATSAPP = "5531999999999";
-    const STORAGE_KEY = "kn2_catalog_data";
+    const ADMIN_PASS = "1234"; // ALTRE A SENHA AQUI
+    const STORAGE_KEY = "kn2_data_v2";
 
-    // Pega os dados ou inicia vazio
     let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
     let activeCategory = "Todos";
-
-    // Função para gerar uma "assinatura" de tempo e forçar o navegador a atualizar a imagem
-    function getCacheBuster() {
-      return "?v=" + new Date().getTime();
-    }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); }
 
+    // Gerador de Cache Buster para forçar atualização da imagem no GitHub
+    const cb = () => "?v=" + new Date().getTime();
+
+    // Funções de Modal
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // LOGIN
+    document.getElementById("openLoginBtn").onclick = () => openModal('loginModal');
+    
+    document.getElementById("doLoginBtn").onclick = () => {
+      const pass = document.getElementById("adminPassInput").value;
+      if(pass === ADMIN_PASS) {
+        closeModal('loginModal');
+        openModal('adminModal');
+        renderAdminList();
+        document.getElementById("adminPassInput").value = "";
+      } else {
+        alert("Senha Incorreta!");
+      }
+    };
+
+    // RENDERIZAÇÃO
     function renderMenu() {
       const menu = document.getElementById("menuRow");
       const categories = ["Todos", ...new Set(products.map(p => p.category))];
@@ -147,8 +178,6 @@
         grouped[p.category].push(p);
       });
 
-      const cb = getCacheBuster();
-
       for (let cat in grouped) {
         const section = document.createElement("div");
         section.className = "categoryBlock";
@@ -157,16 +186,14 @@
         grouped[cat].forEach(p => {
           const card = document.createElement("div");
           card.className = "card";
-          // Adicionamos o Cache Buster na URL da imagem para forçar atualização
-          const finalImgPath = p.image + cb;
+          const imgUrl = p.image + cb();
 
           card.innerHTML = `
-            <img class="productImage" src="${finalImgPath}" 
-                 onclick="openPreview('${finalImgPath}')"
-                 onerror="this.src='https://via.placeholder.com/600x400?text=Imagem+nao+encontrada'">
+            <img class="productImage" src="${imgUrl}" alt="Foto" onclick="openPreview('${imgUrl}')"
+                 onerror="this.src='https://via.placeholder.com/400x400?text=Sem+Foto'">
             <div class="card__body">
               <h3 class="card__title">${p.title}</h3>
-              <div class="card__meta"><strong>R$ ${p.price.toFixed(2)}</strong></div>
+              <div style="margin-bottom:12px"><strong>R$ ${parseFloat(p.price).toFixed(2)}</strong></div>
               <button class="buyBtn" onclick="buy('${p.title}')">WhatsApp</button>
             </div>
           `;
@@ -176,75 +203,19 @@
       }
     }
 
-    // Funções de Preview
-    function openPreview(src) {
-      document.getElementById("imgFull").src = src;
-      document.getElementById("previewModal").classList.add("active");
-    }
-    function closePreview() {
-      document.getElementById("previewModal").classList.remove("active");
-    }
+    // PREVIEW DA FOTO
+    window.openPreview = (url) => {
+      document.getElementById("imgFull").src = url;
+      openModal('previewModal');
+    };
 
     function buy(name) {
-      const msg = encodeURIComponent(`Olá! Quero saber mais sobre: ${name}`);
+      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${name}`);
       window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, "_blank");
     }
 
-    // ADMIN
-    document.getElementById("openAdminBtn").onclick = () => {
-      document.getElementById("adminModal").classList.add("active");
-      renderAdminList();
-    };
-    document.getElementById("closeAdminBtn").onclick = () => document.getElementById("adminModal").classList.remove("active");
-
+    // AÇÕES ADMIN
     document.getElementById("saveBtn").onclick = () => {
       const title = document.getElementById("pTitle").value;
       const cat = document.getElementById("pCategory").value;
-      const price = parseFloat(document.getElementById("pPrice").value);
-      const file = document.getElementById("pFileName").value;
-
-      if (!title || !cat || !price || !file) return alert("Preencha tudo!");
-
-      products.unshift({
-        id: Date.now(),
-        title,
-        category: cat,
-        price,
-        image: `imagens/${file}`
-      });
-
-      save();
-      renderGrid();
-      renderMenu();
-      renderAdminList();
-      alert("Produto salvo!");
-    };
-
-    function renderAdminList() {
-      const list = document.getElementById("adminList");
-      const cb = getCacheBuster();
-      list.innerHTML = products.map(p => `
-        <div class="adminItem">
-          <img src="${p.image + cb}">
-          <span style="flex:1">${p.title}</span>
-          <button class="dangerBtn" onclick="deleteItem(${p.id})">Excluir</button>
-        </div>
-      `).join("");
-    }
-
-    window.deleteItem = (id) => {
-      if(confirm("Deseja excluir este item?")) {
-        products = products.filter(p => p.id !== id);
-        save();
-        renderGrid();
-        renderMenu();
-        renderAdminList();
-      }
-    };
-
-    // Inicialização
-    renderMenu();
-    renderGrid();
-  </script>
-</body>
-</html>
+      const price = document.getElementById("pPrice").
