@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kn2 Personalizados - Catálogo</title>
   <style>
@@ -31,16 +32,22 @@
     .categoryHeading { font-size: 24px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
     .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
     .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; }
-    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: pointer; background: #1f2937; }
+    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; transition: transform 0.2s; }
+    .productImage:hover { transform: scale(1.02); }
     .card__body { padding: 14px; flex-grow: 1; display: flex; flex-direction: column; }
     .card__title { margin: 0 0 10px; font-size: 18px; }
     .card__meta { display: flex; justify-content: space-between; margin-top: auto; margin-bottom: 14px; color: var(--muted); }
     .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-    /* MODAIS */
+    /* MODAL PADRÃO (ADMIN) */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
     .modal.active { display: flex; }
-    .modal__content { width: min(500px, 92vw); background: #111827; border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+    .modal__content { width: min(500px, 92vw); max-height: 90vh; overflow-y: auto; background: #111827; border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+    
+    /* MODAL PREVIEW DA FOTO */
+    #previewModal { background: rgba(0,0,0,.9); cursor: zoom-out; }
+    #previewModal img { max-width: 95%; max-height: 95%; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+
     .formGroup { margin-bottom: 14px; }
     .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); }
     .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; }
@@ -84,8 +91,8 @@
         <input type="number" id="pPrice" step="0.01">
       </div>
       <div class="formGroup">
-        <label>Nome do Arquivo na pasta /imagens</label>
-        <input type="text" id="pFileName" placeholder="exemplo: caneca_azul.jpg">
+        <label>Nome do Arquivo (na pasta /imagens)</label>
+        <input type="text" id="pFileName" placeholder="ex: caneca_azul.jpg">
       </div>
       <button class="saveBtn" id="saveBtn">Salvar Produto</button>
       <hr style="opacity: 0.1; margin: 20px 0;">
@@ -94,16 +101,23 @@
     </div>
   </div>
 
+  <div class="modal" id="previewModal" onclick="closePreview()">
+    <img id="imgFull" src="" alt="Preview">
+  </div>
+
   <script>
     const WHATSAPP = "5531999999999";
     const STORAGE_KEY = "kn2_catalog_data";
 
-    // Dados Iniciais
-    let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
-      { id: 1, title: "Caneca Branca", category: "Canecas", price: 25.00, image: "imagens/exemplo.jpg" }
-    ];
+    // Pega os dados ou inicia vazio
+    let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     let activeCategory = "Todos";
+
+    // Função para gerar uma "assinatura" de tempo e forçar o navegador a atualizar a imagem
+    function getCacheBuster() {
+      return "?v=" + new Date().getTime();
+    }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); }
 
@@ -133,6 +147,8 @@
         grouped[p.category].push(p);
       });
 
+      const cb = getCacheBuster();
+
       for (let cat in grouped) {
         const section = document.createElement("div");
         section.className = "categoryBlock";
@@ -141,8 +157,13 @@
         grouped[cat].forEach(p => {
           const card = document.createElement("div");
           card.className = "card";
+          // Adicionamos o Cache Buster na URL da imagem para forçar atualização
+          const finalImgPath = p.image + cb;
+
           card.innerHTML = `
-            <img class="productImage" src="${p.image}" onerror="this.src='https://via.placeholder.com/600x400?text=Imagem+nao+encontrada'">
+            <img class="productImage" src="${finalImgPath}" 
+                 onclick="openPreview('${finalImgPath}')"
+                 onerror="this.src='https://via.placeholder.com/600x400?text=Imagem+nao+encontrada'">
             <div class="card__body">
               <h3 class="card__title">${p.title}</h3>
               <div class="card__meta"><strong>R$ ${p.price.toFixed(2)}</strong></div>
@@ -155,12 +176,21 @@
       }
     }
 
+    // Funções de Preview
+    function openPreview(src) {
+      document.getElementById("imgFull").src = src;
+      document.getElementById("previewModal").classList.add("active");
+    }
+    function closePreview() {
+      document.getElementById("previewModal").classList.remove("active");
+    }
+
     function buy(name) {
       const msg = encodeURIComponent(`Olá! Quero saber mais sobre: ${name}`);
       window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, "_blank");
     }
 
-    // ADMIN LOGIC
+    // ADMIN
     document.getElementById("openAdminBtn").onclick = () => {
       document.getElementById("adminModal").classList.add("active");
       renderAdminList();
@@ -180,36 +210,39 @@
         title,
         category: cat,
         price,
-        image: `imagens/${file}` // Caminho direto para sua pasta
+        image: `imagens/${file}`
       });
 
       save();
       renderGrid();
       renderMenu();
       renderAdminList();
-      alert("Produto salvo! Lembre-se de subir o arquivo para a pasta /imagens no GitHub.");
+      alert("Produto salvo!");
     };
 
     function renderAdminList() {
       const list = document.getElementById("adminList");
+      const cb = getCacheBuster();
       list.innerHTML = products.map(p => `
         <div class="adminItem">
-          <img src="${p.image}">
+          <img src="${p.image + cb}">
           <span style="flex:1">${p.title}</span>
-          <button class="dangerBtn" onclick="deleteItem(${p.id})">Sair</button>
+          <button class="dangerBtn" onclick="deleteItem(${p.id})">Excluir</button>
         </div>
       `).join("");
     }
 
     window.deleteItem = (id) => {
-      products = products.filter(p => p.id !== id);
-      save();
-      renderGrid();
-      renderMenu();
-      renderAdminList();
+      if(confirm("Deseja excluir este item?")) {
+        products = products.filter(p => p.id !== id);
+        save();
+        renderGrid();
+        renderMenu();
+        renderAdminList();
+      }
     };
 
-    // Início
+    // Inicialização
     renderMenu();
     renderGrid();
   </script>
