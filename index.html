@@ -4,218 +4,203 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kn2 Personalizados - Catálogo</title>
+  <title>Kn2 Personalizados</title>
   <style>
     :root {
       --bg: #0b0f17; --card: #111827; --text: #e5e7eb;
       --muted: #9ca3af; --border: rgba(255, 255, 255, .08);
-      --accent: #22c55e; --danger: #ef4444; --edit: #2563eb;
+      --accent: #22c55e; --danger: #ef4444;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; }
     .container { width: min(1100px, 92vw); margin: auto; }
     
-    /* TOPO */
-    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
-    .topbar__inner { padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
-    .brand { margin: 0; font-size: 20px; }
-    .adminBtn { border: none; background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .topbar { position: sticky; top: 0; z-index: 999; background: #0b0f17; border-bottom: 1px solid var(--border); padding: 15px 0; }
+    .topbar__inner { display: flex; justify-content: space-between; align-items: center; }
+    
+    .adminBtn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-    /* MENU CATEGORIAS */
-    .menu { margin-top: 20px; }
-    .menu__row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
-    .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
+    .menu__row { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+    .menu__btn.active { background: var(--accent); border-color: var(--accent); }
 
-    /* GRID */
-    .categoryBlock { margin-bottom: 40px; }
-    .categoryHeading { font-size: 24px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-    .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; }
-    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; }
-    .card__body { padding: 14px; flex-grow: 1; display: flex; flex-direction: column; }
-    .card__title { margin: 0 0 10px; font-size: 18px; }
-    .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
+    .productImage { width: 100%; height: 200px; object-fit: cover; cursor: zoom-in; }
+    .card__body { padding: 15px; }
 
     /* MODAIS */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
     .modal.active { display: flex; }
-    .modal__content { width: min(450px, 100%); background: #111827; border-radius: 20px; padding: 25px; border: 1px solid var(--border); position: relative; }
+    .modal__content { background: #111827; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; border: 1px solid var(--border); }
     
-    /* PREVIEW ESPECÍFICO */
-    #previewModal { background: rgba(0,0,0,.95); cursor: zoom-out; }
-    #previewModal img { max-width: 100%; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: #0b0f17; color: white; }
+    .btnAction { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    .btnSave { background: var(--accent); color: white; }
+    .btnClose { background: #374151; color: white; }
 
-    .formGroup { margin-bottom: 15px; }
-    .formGroup label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 14px; }
-    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; outline: none; }
-    .formGroup input:focus { border-color: var(--accent); }
-    
-    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .closeBtn { width: 100%; border: none; background: #374151; color: white; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
-    
-    #adminList { margin-top: 20px; max-height: 200px; overflow-y: auto; }
-    .adminItem { display: flex; gap: 10px; align-items: center; background: #0f172a; padding: 8px; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
-    .adminItem img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
-    .dangerBtn { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-
-    @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
+    #adminList { margin-top: 20px; max-height: 150px; overflow-y: auto; border-top: 1px solid var(--border); padding-top: 10px; }
+    .adminItem { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 12px; }
   </style>
 </head>
 <body>
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <h1 class="brand">Kn2 Personalizados</h1>
-      <button class="adminBtn" id="openLoginBtn">Admin</button>
+      <h1 style="margin:0; font-size: 1.2rem;">Kn2 Personalizados</h1>
+      <button class="adminBtn" id="btnAbrirLogin">Admin</button>
     </div>
   </header>
 
   <main class="container">
-    <section class="menu"><div class="menu__row" id="menuRow"></div></section>
-    <section id="catalogContainer"></section>
+    <div class="menu__row" id="areaMenu"></div>
+    <div id="areaProdutos"></div>
   </main>
 
-  <div class="modal" id="loginModal">
+  <div class="modal" id="modalLogin">
     <div class="modal__content">
-      <h2 style="margin-top:0">Acesso Restrito</h2>
-      <div class="formGroup">
-        <label>Senha do Administrador</label>
-        <input type="password" id="adminPassInput" placeholder="Digite a senha...">
-      </div>
-      <button class="saveBtn" id="doLoginBtn">Entrar</button>
-      <button class="closeBtn" onclick="closeModal('loginModal')">Cancelar</button>
+      <h3>Acesso Admin</h3>
+      <input type="password" id="senhaInput" placeholder="Senha">
+      <button class="btnAction btnSave" id="btnEntrar">Entrar</button>
+      <button class="btnAction btnClose" onclick="fecharModal('modalLogin')">Cancelar</button>
     </div>
   </div>
 
-  <div class="modal" id="adminModal">
+  <div class="modal" id="modalAdmin">
     <div class="modal__content">
-      <h2 style="margin-top:0">Novo Produto</h2>
-      <div class="formGroup">
-        <label>Nome do Produto</label>
-        <input type="text" id="pTitle">
-      </div>
-      <div class="formGroup">
-        <label>Categoria</label>
-        <input type="text" id="pCategory" placeholder="Ex: Canecas">
-      </div>
-      <div class="formGroup">
-        <label>Preço (R$)</label>
-        <input type="number" id="pPrice" step="0.01">
-      </div>
-      <div class="formGroup">
-        <label>Nome do Arquivo na pasta /imagens</label>
-        <input type="text" id="pFileName" placeholder="ex: foto1.jpg">
-      </div>
-      <button class="saveBtn" id="saveBtn">Salvar no Catálogo</button>
-      
+      <h3>Novo Produto</h3>
+      <input type="text" id="nomeP" placeholder="Nome do Produto">
+      <input type="text" id="catP" placeholder="Categoria (ex: Canecas)">
+      <input type="number" id="precoP" placeholder="Preço R$">
+      <input type="text" id="fotoP" placeholder="Nome da imagem (ex: foto.jpg)">
+      <button class="btnAction btnSave" id="btnGravar">Salvar Produto</button>
       <div id="adminList"></div>
-      
-      <button class="closeBtn" onclick="closeModal('adminModal')">Sair do Painel</button>
+      <button class="btnAction btnClose" onclick="fecharModal('modalAdmin')">Sair</button>
     </div>
   </div>
 
-  <div class="modal" id="previewModal" onclick="closeModal('previewModal')">
-    <img id="imgFull" src="">
+  <div class="modal" id="modalPreview" onclick="fecharModal('modalPreview')">
+    <img id="imgFull" src="" style="max-width: 95%; max-height: 90vh; border-radius: 10px;">
   </div>
 
   <script>
-    const WHATSAPP = "5531999999999";
-    const ADMIN_PASS = "1234"; // ALTRE A SENHA AQUI
-    const STORAGE_KEY = "kn2_data_v2";
-
-    let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    let activeCategory = "Todos";
-
-    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); }
-
-    // Gerador de Cache Buster para forçar atualização da imagem no GitHub
-    const cb = () => "?v=" + new Date().getTime();
+    const SENHA_MESTRA = "1234";
+    const CHAVE_LOCAL = "dados_catalogo_v3";
+    let produtos = JSON.parse(localStorage.getItem(CHAVE_LOCAL)) || [];
+    let catAtiva = "Todos";
 
     // Funções de Modal
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function abrirModal(id) { document.getElementById(id).classList.add('active'); }
+    function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    // LOGIN
-    document.getElementById("openLoginBtn").onclick = () => openModal('loginModal');
-    
-    document.getElementById("doLoginBtn").onclick = () => {
-      const pass = document.getElementById("adminPassInput").value;
-      if(pass === ADMIN_PASS) {
-        closeModal('loginModal');
-        openModal('adminModal');
-        renderAdminList();
-        document.getElementById("adminPassInput").value = "";
-      } else {
-        alert("Senha Incorreta!");
-      }
-    };
-
-    // RENDERIZAÇÃO
+    // Renderizar Menu de Categorias
     function renderMenu() {
-      const menu = document.getElementById("menuRow");
-      const categories = ["Todos", ...new Set(products.map(p => p.category))];
-      menu.innerHTML = categories.map(cat => `
-        <button class="menu__btn ${cat === activeCategory ? 'active' : ''}" 
-                onclick="setCategory('${cat}')">${cat}</button>
+      const area = document.getElementById("areaMenu");
+      const categorias = ["Todos", ...new Set(produtos.map(p => p.category))];
+      area.innerHTML = categorias.map(c => `
+        <button class="menu__btn ${c === catAtiva ? 'active' : ''}" onclick="mudarCat('${c}')">${c}</button>
       `).join("");
     }
 
-    function setCategory(cat) {
-      activeCategory = cat;
+    function mudarCat(c) {
+      catAtiva = c;
       renderMenu();
       renderGrid();
     }
 
+    // Renderizar Produtos
     function renderGrid() {
-      const container = document.getElementById("catalogContainer");
-      container.innerHTML = "";
+      const area = document.getElementById("areaProdutos");
+      area.innerHTML = "";
+      const lista = catAtiva === "Todos" ? produtos : produtos.filter(p => p.category === catAtiva);
       
-      const filtered = activeCategory === "Todos" ? products : products.filter(p => p.category === activeCategory);
-      const grouped = {};
-      filtered.forEach(p => {
-        if (!grouped[p.category]) grouped[p.category] = [];
-        grouped[p.category].push(p);
-      });
-
-      for (let cat in grouped) {
-        const section = document.createElement("div");
-        section.className = "categoryBlock";
-        section.innerHTML = `<h2 class="categoryHeading">${cat}</h2><div class="productsGrid"></div>`;
-        
-        grouped[cat].forEach(p => {
-          const card = document.createElement("div");
-          card.className = "card";
-          const imgUrl = p.image + cb();
-
-          card.innerHTML = `
-            <img class="productImage" src="${imgUrl}" alt="Foto" onclick="openPreview('${imgUrl}')"
-                 onerror="this.src='https://via.placeholder.com/400x400?text=Sem+Foto'">
-            <div class="card__body">
-              <h3 class="card__title">${p.title}</h3>
-              <div style="margin-bottom:12px"><strong>R$ ${parseFloat(p.price).toFixed(2)}</strong></div>
-              <button class="buyBtn" onclick="buy('${p.title}')">WhatsApp</button>
-            </div>
-          `;
-          section.querySelector(".productsGrid").appendChild(card);
-        });
-        container.appendChild(section);
+      if(lista.length === 0) {
+        area.innerHTML = "<p style='color:gray'>Nenhum produto cadastrado.</p>";
+        return;
       }
+
+      const html = lista.map(p => `
+        <div class="card">
+          <img src="${p.image}?v=${Date.now()}" class="productImage" onclick="abrirFoto('${p.image}')" onerror="this.src='https://via.placeholder.com/300?text=Sua+Foto+Aqui'">
+          <div class="card__body">
+            <h4 style="margin:0">${p.title}</h4>
+            <p style="color:var(--accent); font-weight:bold">R$ ${parseFloat(p.price).toFixed(2)}</p>
+            <button class="btnAction btnSave" onclick="pedir('${p.title}')">WhatsApp</button>
+          </div>
+        </div>
+      `).join("");
+      
+      area.innerHTML = `<div class="productsGrid">${html}</div>`;
     }
 
-    // PREVIEW DA FOTO
-    window.openPreview = (url) => {
+    function abrirFoto(url) {
       document.getElementById("imgFull").src = url;
-      openModal('previewModal');
+      abrirModal('modalPreview');
+    }
+
+    function pedir(nome) {
+      window.open(`https://wa.me/5531999999999?text=Quero+saber+mais+sobre+${nome}`, "_blank");
+    }
+
+    // Admin
+    function atualizarAdminLista() {
+      const lista = document.getElementById("adminList");
+      lista.innerHTML = produtos.map((p, index) => `
+        <div class="adminItem">
+          <span>${p.title}</span>
+          <button class="dangerBtn" onclick="remover(${index})" style="background:red; color:white; border:none; padding:3px 7px; border-radius:4px; cursor:pointer">X</button>
+        </div>
+      `).join("");
+    }
+
+    window.remover = (index) => {
+      if(confirm("Remover item?")) {
+        produtos.splice(index, 1);
+        localStorage.setItem(CHAVE_LOCAL, JSON.stringify(produtos));
+        renderGrid();
+        renderMenu();
+        atualizarAdminLista();
+      }
     };
 
-    function buy(name) {
-      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${name}`);
-      window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, "_blank");
-    }
+    // Eventos ao carregar
+    window.onload = () => {
+      renderMenu();
+      renderGrid();
 
-    // AÇÕES ADMIN
-    document.getElementById("saveBtn").onclick = () => {
-      const title = document.getElementById("pTitle").value;
-      const cat = document.getElementById("pCategory").value;
-      const price = document.getElementById("pPrice").
+      // Abrir Login
+      document.getElementById("btnAbrirLogin").addEventListener("click", () => abrirModal('modalLogin'));
+
+      // Logar
+      document.getElementById("btnEntrar").addEventListener("click", () => {
+        if(document.getElementById("senhaInput").value === SENHA_MESTRA) {
+          fecharModal('modalLogin');
+          abrirModal('modalAdmin');
+          atualizarAdminLista();
+          document.getElementById("senhaInput").value = "";
+        } else {
+          alert("Senha incorreta!");
+        }
+      });
+
+      // Gravar Produto
+      document.getElementById("btnGravar").addEventListener("click", () => {
+        const nome = document.getElementById("nomeP").value;
+        const cat = document.getElementById("catP").value;
+        const preco = document.getElementById("precoP").value;
+        const foto = document.getElementById("fotoP").value;
+
+        if(!nome || !cat || !preco || !foto) return alert("Preencha tudo!");
+
+        produtos.unshift({ title: nome, category: cat, price: preco, image: 'imagens/' + foto });
+        localStorage.setItem(CHAVE_LOCAL, JSON.stringify(produtos));
+        
+        renderGrid();
+        renderMenu();
+        atualizarAdminLista();
+        alert("Salvo!");
+      });
+    };
+  </script>
+</body>
+</html>
