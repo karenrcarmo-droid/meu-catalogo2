@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Big Lanche - Catálogo</title>
+  <style>
+    /* Cole AQUI todo o seu CSS que começa em :root { ... } e vai até o final da tag <style> */
+  </style>
+</head>
+<body>
+  <script>
+    const ADMIN_PASSWORD = "192192";
+    const WHATSAPP_NUMBER = "5531999999999";
+    let products = [];
+
+    // Busca os lanches gravados no Postgres da Vercel
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        products = await res.json();
+        renderMenu();
+        renderGrid();
+      } catch (e) { console.error("Erro ao carregar banco", e); }
+    }
+
+    // Salva o lanche usando a API da Vercel (Foto no Blob + Dados no Postgres)
+    document.getElementById("saveProductBtn").onclick = async () => {
+      const title = document.getElementById("productTitle").value;
+      const category = document.getElementById("productCategory").value;
+      const price = document.getElementById("productPrice").value;
+      const file = document.getElementById("productImage").files[0];
+
+      if(!title || !file) return alert("Preencha o nome e escolha uma foto!");
+
+      const btn = document.getElementById("saveProductBtn");
+      btn.disabled = true; btn.textContent = "Salvando...";
+
+      try {
+        // 1. Envia a foto
+        const upload = await fetch('/api/upload', { method: 'POST', body: file });
+        const blob = await upload.json();
+
+        // 2. Salva os textos
+        await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: crypto.randomUUID(),
+            title, category, price: parseFloat(price), image_url: blob.url
+          })
+        });
+
+        alert("Sucesso!");
+        location.reload();
+      } catch (err) { alert("Erro ao salvar!"); }
+    };
+
+    // Cole AQUI suas funções originais: renderMenu, renderGrid, buyProduct, etc.
+    // IMPORTANTE: No renderGrid, mude a imagem para: src="${product.image_url}"
+
+    loadProducts(); // Inicia o site buscando os dados
+  </script>
+</body>
+</html>
