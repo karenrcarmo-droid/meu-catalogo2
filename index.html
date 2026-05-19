@@ -1,940 +1,217 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kn2 Personalisados - Catálogo Dinâmico</title>
-  <meta name="theme-color" content="#0b0f17">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
+  <title>Kn2 Personalizados - Catálogo</title>
   <style>
     :root {
-      --bg: #0b0f17;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: rgba(255, 255, 255, .08);
-      --accent: #22c55e;
-      --danger: #ef4444;
-      --edit: #2563eb;
+      --bg: #0b0f17; --card: #111827; --text: #e5e7eb;
+      --muted: #9ca3af; --border: rgba(255, 255, 255, .08);
+      --accent: #22c55e; --danger: #ef4444; --edit: #2563eb;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    .container {
-      width: min(1100px, 92vw);
-      margin: auto;
-    }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+    .container { width: min(1100px, 92vw); margin: auto; }
+    
     /* TOPO */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      background: rgba(11, 15, 23, .92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-    }
+    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .topbar__inner { padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+    .brand { margin: 0; font-size: 20px; }
+    .adminBtn { border: none; background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
-    .topbar__inner {
-      padding: 14px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    /* MENU CATEGORIAS */
+    .menu { margin-top: 20px; }
+    .menu__row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
+    .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
 
-    .brand {
-      margin: 0;
-      font-size: 20px;
-    }
+    /* GRID E CARDS */
+    .categoryBlock { margin-bottom: 40px; }
+    .categoryHeading { font-size: 24px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; }
+    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: pointer; background: #1f2937; }
+    .card__body { padding: 14px; flex-grow: 1; display: flex; flex-direction: column; }
+    .card__title { margin: 0 0 10px; font-size: 18px; }
+    .card__meta { display: flex; justify-content: space-between; margin-top: auto; margin-bottom: 14px; color: var(--muted); }
+    .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-    .adminBtn {
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+    /* MODAIS */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    .modal.active { display: flex; }
+    .modal__content { width: min(500px, 92vw); background: #111827; border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+    .formGroup { margin-bottom: 14px; }
+    .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); }
+    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; }
+    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .closeBtn { width: 100%; border: none; background: #374151; color: white; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
+    
+    .adminItem { display: flex; gap: 10px; align-items: center; background: #0f172a; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+    .adminItem img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+    .dangerBtn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-    /* MENU */
-    .menu {
-      margin-top: 20px;
-    }
-
-    .menu__row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .menu__btn {
-      border: 1px solid var(--border);
-      background: transparent;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .menu__btn.active {
-      background: rgba(34, 197, 94, .15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* SEARCH */
-    .search {
-      margin: 18px 0;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #111827;
-      color: white;
-      outline: none;
-    }
-
-    /* CONTAINER AGRUPADO */
-    .categoryBlock {
-      margin-bottom: 40px;
-    }
-
-    .categoryHeading {
-      font-size: 24px;
-      margin: 0 0 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-      color: #fff;
-    }
-
-    .productsGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
-    }
-
-    /* CARD */
-    .card {
-      overflow: hidden;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .productImage {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      display: block;
-      cursor: zoom-in;
-      background: #1f2937;
-    }
-
-    .card__body {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-
-    .card__title {
-      margin: 0 0 10px;
-      font-size: 18px;
-    }
-
-    .card__meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      margin-bottom: 14px;
-      color: var(--muted);
-    }
-
-    .buyBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal__content {
-      width: min(720px, 92vw);
-      max-height: 90vh;
-      overflow: auto;
-      background: #111827;
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--border);
-    }
-
-    .modal__title {
-      margin-top: 0;
-    }
-
-    /* FORM */
-    .formGroup {
-      margin-bottom: 14px;
-    }
-
-    .formGroup label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
-
-    .formGroup input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      color: white;
-    }
-
-    .saveBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 13px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .closeBtn {
-      width: 100%;
-      border: none;
-      background: #374151;
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    /* ADMIN LIST */
-    .adminList {
-      margin-top: 24px;
-    }
-
-    .adminItem {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      background: #0f172a;
-      padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-    }
-
-    .adminItem img {
-      width: 90px;
-      height: 90px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #1f2937;
-    }
-
-    .adminItem__info {
-      flex: 1;
-    }
-
-    .adminActions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .editBtn {
-      border: none;
-      background: var(--edit);
-      color: white;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .dangerBtn {
-      border: none;
-      background: var(--danger);
-      color: white;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 30px;
-    }
-
-    /* PREVIEW IMAGEM */
-    .imagePreviewModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999999;
-      padding: 20px;
-    }
-
-    .imagePreviewModal.active {
-      display: flex;
-    }
-
-    .imagePreviewModal img {
-      max-width: 95%;
-      max-height: 95vh;
-      object-fit: contain;
-      border-radius: 12px;
-    }
-
-    .closePreviewBtn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 44px;
-      height: 44px;
-      border: none;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .15);
-      color: white;
-      font-size: 22px;
-      cursor: pointer;
-    }
-
-    /* MOBILE */
-    @media(max-width:600px) {
-      .productsGrid {
-        grid-template-columns: 1fr;
-      }
-
-      .adminItem {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .adminItem img {
-        width: 100%;
-        height: 180px;
-      }
-    }
+    @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
   </style>
 </head>
-
 <body>
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <h1 class="brand">Meu Catalogo</h1>
+      <h1 class="brand">Kn2 Personalizados</h1>
       <button class="adminBtn" id="openAdminBtn">Admin</button>
     </div>
   </header>
 
   <main class="container">
-    <section class="menu">
-      <div class="menu__row" id="menuRow"></div>
-    </section>
-
-    <section class="search">
-      <input type="text" id="searchInput" placeholder="Buscar produto..." />
-    </section>
-
+    <section class="menu"><div class="menu__row" id="menuRow"></div></section>
     <section id="catalogContainer"></section>
-
-    <p class="empty" id="emptyState" hidden>Nenhum produto encontrado.</p>
   </main>
-
-  <div class="modal" id="loginModal">
-    <div class="modal__content">
-      <h2 class="modal__title">Login Admin</h2>
-      <div class="formGroup">
-        <label>Senha</label>
-        <input type="password" id="adminPassword" placeholder="Digite a senha" />
-      </div>
-      <button class="saveBtn" id="loginBtn">Entrar</button>
-      <button class="closeBtn" id="closeLoginBtn">Fechar</button>
-    </div>
-  </div>
 
   <div class="modal" id="adminModal">
     <div class="modal__content">
-      <h2 class="modal__title">Painel Administrativo</h2>
+      <h2>Painel Admin</h2>
       <div class="formGroup">
-        <label>Nome Produto</label>
-        <input type="text" id="productTitle" />
+        <label>Nome do Produto</label>
+        <input type="text" id="pTitle">
       </div>
       <div class="formGroup">
-        <label>Categoria (Pasta no Banco de Dados)</label>
-        <input type="text" id="productCategory" placeholder="Ex: Canecas, Botons," />
+        <label>Categoria</label>
+        <input type="text" id="pCategory" placeholder="Ex: Canecas">
       </div>
       <div class="formGroup">
         <label>Preço</label>
-        <input type="number" id="productPrice" step="0.01" />
+        <input type="number" id="pPrice" step="0.01">
       </div>
       <div class="formGroup">
-        <label>Imagem</label>
-        <input type="file" id="productImage" accept="image/*" />
+        <label>Nome do Arquivo na pasta /imagens</label>
+        <input type="text" id="pFileName" placeholder="exemplo: caneca_azul.jpg">
       </div>
-      <button class="saveBtn" id="saveProductBtn">Salvar Produto</button>
-      <div class="adminList" id="adminList"></div>
+      <button class="saveBtn" id="saveBtn">Salvar Produto</button>
+      <hr style="opacity: 0.1; margin: 20px 0;">
+      <div id="adminList"></div>
       <button class="closeBtn" id="closeAdminBtn">Fechar</button>
     </div>
   </div>
 
-  <div class="imagePreviewModal" id="imagePreviewModal">
-    <button class="closePreviewBtn" id="closePreviewBtn">✕</button>
-    <img id="previewImage" src="" alt="Preview" />
-  </div>
-
   <script>
-    /* CONFIG */
-    const ADMIN_PASSWORD = "192192";
-    const WHATSAPP_NUMBER = "5531999999999";
-    const STORAGE_KEY = "catalog_products_v8";
+    const WHATSAPP = "5531999999999";
+    const STORAGE_KEY = "kn2_catalog_data";
 
-    /* INDEXEDDB DINÂMICO - ORGANIZADO POR PASTAS DE CATEGORIA 
-       Cada categoria vira uma Store ("pasta") independente dentro do banco.
-    */
-    const dbName = "BigLancheFoldersDB";
-    let dbInstance = null;
-
-    // Conecta e garante que as "pastas" das categorias existentes estejam criadas no banco de dados
-    function getDBInstance(requiredCategories, callback) {
-      // Normaliza os nomes para evitar erros de caracteres especiais no nome das stores/pastas
-      const safeFolders = requiredCategories.map(c => "folder_" + normalizeStoreName(c));
-      
-      // Se já está aberto e possui todas as pastas necessárias, retorna a instância ativa
-      if (dbInstance) {
-        let hasAll = true;
-        safeFolders.forEach(folder => {
-          if (!dbInstance.objectStoreNames.contains(folder)) hasAll = false;
-        });
-        if (hasAll) {
-          callback(dbInstance);
-          return;
-        }
-        dbInstance.close();
-      }
-
-      // Obtém versão atualizada baseada no número de categorias para forçar gatilho do onupgradeneeded
-      const currentVersion = parseInt(localStorage.getItem("db_version_key")) || 1;
-      const nextVersion = currentVersion + 1;
-
-      const request = indexedDB.open(dbName, nextVersion);
-
-      request.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        localStorage.setItem("db_version_key", nextVersion);
-
-        // Cria as pastas (Object Stores) que ainda não existem
-        safeFolders.forEach(folder => {
-          if (!db.objectStoreNames.contains(folder)) {
-            db.createObjectStore(folder, { keyPath: "id" });
-          }
-        });
-      };
-
-      request.onsuccess = (e) => {
-        dbInstance = e.target.result;
-        callback(dbInstance);
-      };
-
-      request.onerror = () => {
-        console.error("Erro ao gerenciar pastas do banco de dados.");
-        callback(null);
-      };
-    }
-
-    // Função auxiliar para normalizar e limpar o nome da pasta no banco
-    function normalizeStoreName(str) {
-      return String(str || "geral")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-zA-Z0-9]/g, "")
-        .toLowerCase();
-    }
-
-    // Salva a imagem especificamente dentro da pasta da categoria dela
-    function saveImageIntoFolder(id, category, base64Data) {
-      const categoriesList = getCategoriesList();
-      getDBInstance(categoriesList, (db) => {
-        if (!db) return;
-        const folderName = "folder_" + normalizeStoreName(category);
-        const tx = db.transaction(folderName, "readwrite");
-        const store = tx.objectStore(folderName);
-        store.put({ id: id, data: base64Data });
-      });
-    }
-
-    // Busca a imagem de dentro da sua pasta correspondente
-    function getImageFromFolder(id, category, callback) {
-      const categoriesList = getCategoriesList();
-      getDBInstance(categoriesList, (db) => {
-        if (!db) {
-          callback(null);
-          return;
-        }
-        const folderName = "folder_" + normalizeStoreName(category);
-        if (!db.objectStoreNames.contains(folderName)) {
-          callback(null);
-          return;
-        }
-        const tx = db.transaction(folderName, "readonly");
-        const store = tx.objectStore(folderName);
-        const request = store.get(id);
-        request.onsuccess = () => {
-          callback(request.result ? request.result.data : null);
-        };
-        request.onerror = () => callback(null);
-      });
-    }
-
-    // Remove a imagem da pasta correta
-    function deleteImageFromFolder(id, category) {
-      const categoriesList = getCategoriesList();
-      getDBInstance(categoriesList, (db) => {
-        if (!db) return;
-        const folderName = "folder_" + normalizeStoreName(category);
-        if (!db.objectStoreNames.contains(folderName)) return;
-        const tx = db.transaction(folderName, "readwrite");
-        const store = tx.objectStore(folderName);
-        store.delete(id);
-      });
-    }
-
-    /* STORAGE TEXTOS */
+    // Dados Iniciais
     let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
-      {
-        id: "default-burguer",
-        title: "X-Burguer Tradicional",
-        category: "Canecas",
-        price: 18.90,
-        image: "https://picsum.photos/seed/burguer/600/400"
-      },
-      {
-        id: "default-coca",
-        title: "Coca-Cola Lata",
-        category: "Botons",
-        price: 6.00,
-        image: "https://picsum.photos/seed/coca/600/400"
-      }
+      { id: 1, title: "Caneca Branca", category: "Canecas", price: 25.00, image: "imagens/exemplo.jpg" }
     ];
 
-    /* STATE */
     let activeCategory = "Todos";
-    let query = "";
 
-    /* ELEMENTOS */
-    const catalogContainer = document.getElementById("catalogContainer");
-    const menuRow = document.getElementById("menuRow");
-    const emptyState = document.getElementById("emptyState");
-    const searchInput = document.getElementById("searchInput");
-    const loginModal = document.getElementById("loginModal");
-    const adminModal = document.getElementById("adminModal");
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); }
 
-    /* HELPERS */
-    function saveProducts() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    }
-
-    function normalize(str) {
-      return String(str || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-    }
-
-    function sanitizeText(value) {
-      return String(value || "").trim().substring(0, 120);
-    }
-
-    function sanitizePrice(value) {
-      const num = Number(value);
-      return isNaN(num) ? 0 : Math.max(0, num);
-    }
-
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function formatPrice(value) {
-      return Number(value).toFixed(2).replace(".", ",");
-    }
-
-    function getCategoriesList() {
-      const set = new Set();
-      products.forEach(product => {
-        if (product.category) set.add(product.category);
-      });
-      return Array.from(set);
-    }
-
-    /* MENU RENDER */
     function renderMenu() {
-      menuRow.innerHTML = "";
-      const categories = ["Todos", ...getCategoriesList()];
-      categories.forEach(category => {
-        const btn = document.createElement("button");
-        btn.className = "menu__btn";
-        if (category === activeCategory) btn.classList.add("active");
-        btn.textContent = category;
-        btn.onclick = () => {
-          activeCategory = category;
-          renderMenu();
-          renderGrid();
-        };
-        menuRow.appendChild(btn);
-      });
+      const menu = document.getElementById("menuRow");
+      const categories = ["Todos", ...new Set(products.map(p => p.category))];
+      menu.innerHTML = categories.map(cat => `
+        <button class="menu__btn ${cat === activeCategory ? 'active' : ''}" 
+                onclick="setCategory('${cat}')">${cat}</button>
+      `).join("");
     }
 
-    /* FILTRO DE PRODUTOS */
-    function filterProducts() {
-      const q = normalize(query);
-      return products.filter(product => {
-        const categoryMatch = activeCategory === "Todos" || product.category === activeCategory;
-        const searchMatch = !q || normalize(product.title).includes(q);
-        return categoryMatch && searchMatch;
-      });
-    }
-
-    /* WHATSAPP ORDER */
-    function buyProduct(product) {
-      const message = encodeURIComponent(
-        `Olá! Tenho interesse no produto:\n\n🛍️ ${product.title}\n💰 R$ ${formatPrice(product.price)}\n\nPode me enviar mais informações?`
-      );
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
-    }
-
-    /* IMAGEM PREVIEW */
-    const imagePreviewModal = document.getElementById("imagePreviewModal");
-    const previewImage = document.getElementById("previewImage");
-    const closePreviewBtn = document.getElementById("closePreviewBtn");
-
-    function openImagePreview(src) {
-      previewImage.src = src;
-      imagePreviewModal.classList.add("active");
-    }
-
-    function closeImagePreview() {
-      imagePreviewModal.classList.remove("active");
-      previewImage.src = "";
-    }
-
-    closePreviewBtn.onclick = closeImagePreview;
-    imagePreviewModal.onclick = (e) => {
-      if (e.target === imagePreviewModal) closeImagePreview();
-    };
-
-    /* RENDER DO GRID AGRUPADO - CRIA A CATEGORIA PRIMEIRO */
-    function renderGrid() {
-      const items = filterProducts();
-      catalogContainer.innerHTML = "";
-
-      emptyState.hidden = items.length !== 0;
-      if (items.length === 0) return;
-
-      // Agrupar produtos por Categoria
-      const groupedProducts = {};
-      items.forEach(product => {
-        if (!groupedProducts[product.category]) {
-          groupedProducts[product.category] = [];
-        }
-        groupedProducts[product.category].push(product);
-      });
-
-      // Mapeia criando primeiro os elementos da Categoria e depois injeta os cards
-      Object.keys(groupedProducts).forEach(category => {
-        const categoryBlock = document.createElement("div");
-        categoryBlock.className = "categoryBlock";
-
-        const categoryTitle = document.createElement("h2");
-        categoryTitle.className = "categoryHeading";
-        categoryTitle.textContent = category;
-        categoryBlock.appendChild(categoryTitle);
-
-        const productsGrid = document.createElement("div");
-        productsGrid.className = "productsGrid";
-
-        groupedProducts[category].forEach(product => {
-          const card = document.createElement("article");
-          card.className = "card";
-          const imgId = `img-${product.id}`;
-
-          card.innerHTML = `
-            <img class="productImage" id="${imgId}" src="https://via.placeholder.com/600x400?text=Carregando..." alt="${escapeHtml(product.title)}" loading="lazy"/>
-            <div class="card__body">
-              <h3 class="card__title">${escapeHtml(product.title)}</h3>
-              <div class="card__meta">
-                <span>${escapeHtml(product.category)}</span>
-                <strong>R$ ${formatPrice(product.price)}</strong>
-              </div>
-              <button class="buyBtn">Comprar no WhatsApp</button>
-            </div>
-          `;
-
-          // Carrega buscando direto da PASTA correspondente do banco de dados
-          if (product.image.startsWith("http")) {
-            card.querySelector(`#${imgId}`).src = product.image;
-          } else {
-            getImageFromFolder(product.id, product.category, (cachedImg) => {
-              const imgEl = card.querySelector(`#${imgId}`);
-              if (imgEl) {
-                imgEl.src = cachedImg || "https://via.placeholder.com/600x400?text=Sem+Imagem";
-              }
-            });
-          }
-
-          card.querySelector(".buyBtn").onclick = () => buyProduct(product);
-          card.querySelector(".productImage").onclick = function() {
-            openImagePreview(this.src);
-          };
-          
-          productsGrid.appendChild(card);
-        });
-
-        categoryBlock.appendChild(productsGrid);
-        catalogContainer.appendChild(categoryBlock);
-      });
-    }
-
-    /* ADMIN LIST */
-    function renderAdminList() {
-      const adminList = document.getElementById("adminList");
-      adminList.innerHTML = "";
-
-      if (products.length === 0) {
-        adminList.innerHTML = `<div class="empty">Nenhum produto cadastrado.</div>`;
-        return;
-      }
-
-      products.forEach(product => {
-        const item = document.createElement("div");
-        item.className = "adminItem";
-        const adminImgId = `admin-img-${product.id}`;
-
-        item.innerHTML = `
-          <img id="${adminImgId}" src="https://via.placeholder.com/300x300?text=..." loading="lazy"/>
-          <div class="adminItem__info">
-            <strong>${escapeHtml(product.title)}</strong>
-            <div>Categoria: ${escapeHtml(product.category)}</div>
-            <div>R$ ${formatPrice(product.price)}</div>
-          </div>
-          <div class="adminActions">
-            <button class="editBtn">Editar</button>
-            <button class="dangerBtn">Excluir</button>
-          </div>
-        `;
-
-        if (product.image.startsWith("http")) {
-          item.querySelector(`#${adminImgId}`).src = product.image;
-        } else {
-          getImageFromFolder(product.id, product.category, (cachedImg) => {
-            const imgEl = item.querySelector(`#${adminImgId}`);
-            if (imgEl) imgEl.src = cachedImg || "https://via.placeholder.com/300x300?text=Sem+Imagem";
-          });
-        }
-
-        /* EDITAR PRODUTO E ALTERAR PASTA */
-        item.querySelector(".editBtn").onclick = () => {
-          const oldCategory = product.category;
-          const title = prompt("Nome produto:", product.title);
-          if (title === null) return;
-          const category = prompt("Nova Categoria (Move para outra Pasta do Banco):", product.category);
-          if (category === null) return;
-          const price = prompt("Preço:", product.price);
-          if (price === null) return;
-
-          const sanitizedCat = sanitizeText(category);
-
-          // Se mudou de categoria, move o arquivo de imagem para a pasta nova no banco
-          if (normalizeStoreName(oldCategory) !== normalizeStoreName(sanitizedCat) && !product.image.startsWith("http")) {
-            getImageFromFolder(product.id, oldCategory, (imgData) => {
-              if (imgData) {
-                // Cria e insere na pasta nova
-                saveImageIntoFolder(product.id, sanitizedCat, imgData);
-                // Deleta da pasta antiga
-                deleteImageFromFolder(product.id, oldCategory);
-              }
-            });
-          }
-
-          product.title = sanitizeText(title);
-          product.category = sanitizedCat;
-          product.price = sanitizePrice(price);
-
-          saveProducts();
-          
-          // Garante sincronia das pastas antes de re-renderizar
-          const list = getCategoriesList();
-          getDBInstance(list, () => {
-            renderGrid();
-            renderMenu();
-            renderAdminList();
-          });
-          alert("Produto atualizado com sucesso!");
-        };
-
-        /* EXCLUIR */
-        item.querySelector(".dangerBtn").onclick = () => {
-          if (!confirm(`Excluir "${product.title}" ?`)) return;
-
-          deleteImageFromFolder(product.id, product.category);
-          products = products.filter(p => p.id !== product.id);
-          saveProducts();
-          renderGrid();
-          renderMenu();
-          renderAdminList();
-        };
-
-        adminList.appendChild(item);
-      });
-    }
-
-    /* SALVAR NOVO PRODUTO DENTRO DA SUA PASTA */
-    document.getElementById("saveProductBtn").onclick = () => {
-      const title = sanitizeText(document.getElementById("productTitle").value);
-      const category = sanitizeText(document.getElementById("productCategory").value);
-      const price = sanitizePrice(document.getElementById("productPrice").value);
-      const imageInput = document.getElementById("productImage");
-
-      if (!title || !category || !price) {
-        alert("Preencha todos os campos.");
-        return;
-      }
-      if (!imageInput.files[0]) {
-        alert("Selecione uma imagem.");
-        return;
-      }
-
-      const file = imageInput.files[0];
-      if (!file.type.startsWith("image/")) {
-        alert("Arquivo inválido.");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Imagem muito grande. Máximo 5MB.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const newId = crypto.randomUUID();
-        
-        // Garante a existência da "pasta" correspondente e salva nela de forma exclusiva
-        products.unshift({
-          id: newId,
-          title,
-          category,
-          price,
-          image: "local"
-        });
-
-        const currentCategories = getCategoriesList();
-        getDBInstance(currentCategories, (db) => {
-          // Salva a imagem estritamente na pasta isolada desta categoria
-          saveImageIntoFolder(newId, category, reader.result);
-
-          saveProducts();
-          renderGrid();
-          renderMenu();
-          renderAdminList();
-
-          document.getElementById("productTitle").value = "";
-          document.getElementById("productCategory").value = "";
-          document.getElementById("productPrice").value = "";
-          imageInput.value = "";
-
-          alert("Produto salvo na pasta de destino!");
-        });
-      };
-      reader.readAsDataURL(file);
-    };
-
-    /* LOGIN CONTROLERS */
-    document.getElementById("openAdminBtn").onclick = () => loginModal.classList.add("active");
-    document.getElementById("closeLoginBtn").onclick = () => loginModal.classList.remove("active");
-    document.getElementById("closeAdminBtn").onclick = () => adminModal.classList.remove("active");
-
-    document.getElementById("loginBtn").onclick = () => {
-      const password = document.getElementById("adminPassword").value;
-      if (password === ADMIN_PASSWORD) {
-        loginModal.classList.remove("active");
-        adminModal.classList.add("active");
-        renderAdminList();
-        document.getElementById("adminPassword").value = "";
-      } else {
-        alert("Senha incorreta.");
-      }
-    };
-
-    /* BUSCA */
-    searchInput.addEventListener("input", e => {
-      query = e.target.value;
-      renderGrid();
-    });
-
-    /* INICIALIZAÇÃO ALINHADA ÀS PASTAS */
-    const initialCategories = getCategoriesList();
-    getDBInstance(initialCategories, () => {
+    function setCategory(cat) {
+      activeCategory = cat;
       renderMenu();
       renderGrid();
-    });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-      });
     }
+
+    function renderGrid() {
+      const container = document.getElementById("catalogContainer");
+      container.innerHTML = "";
+      
+      const filtered = activeCategory === "Todos" ? products : products.filter(p => p.category === activeCategory);
+      const grouped = {};
+      filtered.forEach(p => {
+        if (!grouped[p.category]) grouped[p.category] = [];
+        grouped[p.category].push(p);
+      });
+
+      for (let cat in grouped) {
+        const section = document.createElement("div");
+        section.className = "categoryBlock";
+        section.innerHTML = `<h2 class="categoryHeading">${cat}</h2><div class="productsGrid"></div>`;
+        
+        grouped[cat].forEach(p => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img class="productImage" src="${p.image}" onerror="this.src='https://via.placeholder.com/600x400?text=Imagem+nao+encontrada'">
+            <div class="card__body">
+              <h3 class="card__title">${p.title}</h3>
+              <div class="card__meta"><strong>R$ ${p.price.toFixed(2)}</strong></div>
+              <button class="buyBtn" onclick="buy('${p.title}')">WhatsApp</button>
+            </div>
+          `;
+          section.querySelector(".productsGrid").appendChild(card);
+        });
+        container.appendChild(section);
+      }
+    }
+
+    function buy(name) {
+      const msg = encodeURIComponent(`Olá! Quero saber mais sobre: ${name}`);
+      window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, "_blank");
+    }
+
+    // ADMIN LOGIC
+    document.getElementById("openAdminBtn").onclick = () => {
+      document.getElementById("adminModal").classList.add("active");
+      renderAdminList();
+    };
+    document.getElementById("closeAdminBtn").onclick = () => document.getElementById("adminModal").classList.remove("active");
+
+    document.getElementById("saveBtn").onclick = () => {
+      const title = document.getElementById("pTitle").value;
+      const cat = document.getElementById("pCategory").value;
+      const price = parseFloat(document.getElementById("pPrice").value);
+      const file = document.getElementById("pFileName").value;
+
+      if (!title || !cat || !price || !file) return alert("Preencha tudo!");
+
+      products.unshift({
+        id: Date.now(),
+        title,
+        category: cat,
+        price,
+        image: `imagens/${file}` // Caminho direto para sua pasta
+      });
+
+      save();
+      renderGrid();
+      renderMenu();
+      renderAdminList();
+      alert("Produto salvo! Lembre-se de subir o arquivo para a pasta /imagens no GitHub.");
+    };
+
+    function renderAdminList() {
+      const list = document.getElementById("adminList");
+      list.innerHTML = products.map(p => `
+        <div class="adminItem">
+          <img src="${p.image}">
+          <span style="flex:1">${p.title}</span>
+          <button class="dangerBtn" onclick="deleteItem(${p.id})">Sair</button>
+        </div>
+      `).join("");
+    }
+
+    window.deleteItem = (id) => {
+      products = products.filter(p => p.id !== id);
+      save();
+      renderGrid();
+      renderMenu();
+      renderAdminList();
+    };
+
+    // Início
+    renderMenu();
+    renderGrid();
   </script>
 </body>
 </html>
