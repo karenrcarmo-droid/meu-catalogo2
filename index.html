@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kn2 Personalizados - Catálogo Supabase</title>
+  <title>Kn2 Personalizados - Catálogo</title>
   <meta name="theme-color" content="#0b0f17">
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,212 +18,65 @@
       --border: rgba(255, 255, 255, .08);
       --accent: #22c55e;
       --danger: #ef4444;
-      --edit: #2563eb;
     }
 
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
     .container { width: min(1100px, 92vw); margin: auto; }
 
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      background: rgba(11, 15, 23, .92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-    }
-
+    /* Topbar */
+    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
     .topbar__inner { padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+    
+    .adminBtn { border: none; background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .logoutBtn { background: #374151; margin-left: 10px; display: none; }
 
-    .brand { margin: 0; font-size: 20px; }
-
-    .adminBtn {
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
+    /* Menu & Search */
     .menu { margin-top: 20px; }
     .menu__row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .menu__btn {
-      border: 1px solid var(--border);
-      background: transparent;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-    }
-
-    .menu__btn.active {
-      background: rgba(34, 197, 94, .15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: 0.2s; }
+    .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
 
     .search { margin: 18px 0; }
-    #searchInput {
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #111827;
-      color: white;
-      outline: none;
-    }
+    #searchInput { width: 100%; padding: 13px; border-radius: 12px; border: 1px solid var(--border); background: #111827; color: white; outline: none; }
 
+    /* Grid */
     .categoryBlock { margin-bottom: 40px; }
-    .categoryHeading {
-      font-size: 24px;
-      margin: 0 0 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-      color: #fff;
-    }
+    .categoryHeading { font-size: 24px; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border); color: #fff; }
+    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 
-    .productsGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      overflow: hidden;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .productImage {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      cursor: zoom-in;
-      background: #1f2937;
-    }
+    .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-4px); }
+    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; }
 
     .card__body { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
     .card__title { margin: 0 0 10px; font-size: 18px; }
-    .card__meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      margin-bottom: 14px;
-      color: var(--muted);
-    }
+    .card__meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; margin-bottom: 14px; }
+    .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-    .buyBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
+    /* Modais */
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .7); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
     .modal.active { display: flex; }
+    .modal__content { width: min(500px, 92vw); max-height: 90vh; overflow: auto; background: #111827; border-radius: 20px; padding: 25px; border: 1px solid var(--border); }
 
-    .modal__content {
-      width: min(720px, 92vw);
-      max-height: 90vh;
-      overflow: auto;
-      background: #111827;
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--border);
-    }
+    .formGroup { margin-bottom: 15px; }
+    .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 14px; }
+    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; }
 
-    .formGroup { margin-bottom: 14px; }
-    .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); }
-    .formGroup input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      color: white;
-    }
+    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .closeBtn { width: 100%; border: none; background: #374151; color: white; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
 
-    .saveBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 13px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    /* Admin List */
+    .adminItem { display: flex; gap: 12px; align-items: center; background: #0f172a; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+    .adminItem img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+    .adminItem__info { flex: 1; font-size: 14px; }
+    .dangerBtn { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
 
-    .closeBtn {
-      width: 100%;
-      border: none;
-      background: #374151;
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .adminItem {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      background: #0f172a;
-      padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-    }
-
-    .adminItem img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; }
-    .adminItem__info { flex: 1; }
-    .adminActions { display: flex; gap: 8px; }
-
-    .dangerBtn { background: var(--danger); color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
-
-    .imagePreviewModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 99999;
-    }
+    .imagePreviewModal { position: fixed; inset: 0; background: rgba(0, 0, 0, .9); display: none; justify-content: center; align-items: center; z-index: 99999; }
     .imagePreviewModal.active { display: flex; }
     .imagePreviewModal img { max-width: 90%; max-height: 90%; border-radius: 10px; }
 
-    @media(max-width:600px) {
-      .productsGrid { grid-template-columns: 1fr; }
-      .adminItem { flex-direction: column; align-items: flex-start; }
-    }
+    @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
   </style>
 </head>
 
@@ -231,8 +84,11 @@
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <h1 class="brand">Kn2 Catalogo</h1>
-      <button class="adminBtn" id="openAdminBtn">Admin</button>
+      <h1 style="margin:0; font-size: 20px;">Kn2 Catálogo</h1>
+      <div>
+        <button class="adminBtn" id="openAdminBtn">Painel Admin</button>
+        <button class="adminBtn logoutBtn" id="logoutBtn">Sair</button>
+      </div>
     </div>
   </header>
 
@@ -242,48 +98,58 @@
     </section>
 
     <section class="search">
-      <input type="text" id="searchInput" placeholder="Buscar produto..." />
+      <input type="text" id="searchInput" placeholder="O que você está procurando?" />
     </section>
 
     <section id="catalogContainer"></section>
-    <p class="empty" id="emptyState" hidden style="text-align:center; padding:40px; color:gray;">Nenhum produto encontrado.</p>
+    <p id="emptyState" hidden style="text-align:center; padding:40px; color:gray;">Nenhum produto encontrado.</p>
   </main>
 
   <div class="modal" id="loginModal">
     <div class="modal__content">
-      <h2>Login Admin</h2>
+      <h2 style="margin-top:0">Login Restrito</h2>
+      <div class="formGroup">
+        <label>E-mail do Admin</label>
+        <input type="email" id="adminEmail" placeholder="seu@email.com" />
+      </div>
       <div class="formGroup">
         <label>Senha</label>
         <input type="password" id="adminPassword" />
       </div>
-      <button class="saveBtn" id="loginBtn">Entrar</button>
-      <button class="closeBtn" id="closeLoginBtn">Fechar</button>
+      <button class="saveBtn" id="loginBtn">Entrar no Sistema</button>
+      <button class="closeBtn" id="closeLoginBtn">Cancelar</button>
     </div>
   </div>
 
   <div class="modal" id="adminModal">
-    <div class="modal__content">
-      <h2>Painel Administrativo</h2>
-      <div class="formGroup">
-        <label>Nome Produto</label>
-        <input type="text" id="productTitle" />
+    <div class="modal__content" style="width: min(700px, 92vw);">
+      <h2 style="margin-top:0">Novo Produto</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="formGroup">
+          <label>Nome</label>
+          <input type="text" id="productTitle" />
+        </div>
+        <div class="formGroup">
+          <label>Categoria</label>
+          <input type="text" id="productCategory" placeholder="Ex: Copos" />
+        </div>
       </div>
-      <div class="formGroup">
-        <label>Categoria</label>
-        <input type="text" id="productCategory" placeholder="Ex: Lanches, Bebidas" />
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="formGroup">
+          <label>Preço (R$)</label>
+          <input type="number" id="productPrice" step="0.01" />
+        </div>
+        <div class="formGroup">
+          <label>Foto do Produto</label>
+          <input type="file" id="productImage" accept="image/*" />
+        </div>
       </div>
-      <div class="formGroup">
-        <label>Preço</label>
-        <input type="number" id="productPrice" step="0.01" />
-      </div>
-      <div class="formGroup">
-        <label>Imagem</label>
-        <input type="file" id="productImage" accept="image/*" />
-      </div>
-      <button class="saveBtn" id="saveProductBtn">Salvar no Supabase</button>
-      <hr style="opacity:0.1; margin: 20px 0;">
+      <button class="saveBtn" id="saveProductBtn">Salvar Produto</button>
+      
+      <hr style="opacity:0.1; margin: 25px 0;">
+      <h3>Gerenciar Existentes</h3>
       <div id="adminList"></div>
-      <button class="closeBtn" id="closeAdminBtn">Fechar</button>
+      <button class="closeBtn" id="closeAdminBtn">Fechar Painel</button>
     </div>
   </div>
 
@@ -292,38 +158,34 @@
   </div>
 
   <script>
-    /* 1. CONFIGURAÇÃO SUPABASE - COLOQUE SEUS DADOS AQUI */
+    /* CONFIGURAÇÃO */
     const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co/";
     const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const ADMIN_PASSWORD = "192192";
     const WHATSAPP_NUMBER = "5531999683959";
 
-    /* STATE */
     let products = [];
     let activeCategory = "Todos";
     let searchQuery = "";
 
-    /* INICIALIZAÇÃO */
     async function init() {
       await fetchProducts();
+      checkUser(); // Verifica se já está logado
       renderMenu();
       renderGrid();
     }
 
-    /* BUSCAR PRODUTOS DO BANCO */
     async function fetchProducts() {
       const { data, error } = await _supabase
         .from('produtos')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) console.error("Erro ao buscar:", error);
-      else products = data || [];
+      if (!error) products = data || [];
     }
 
-    /* RENDERIZAR MENU */
+    /* RENDERIZAÇÃO */
     function renderMenu() {
       const menuRow = document.getElementById("menuRow");
       menuRow.innerHTML = "";
@@ -342,7 +204,6 @@
       });
     }
 
-    /* RENDERIZAR GRID */
     function renderGrid() {
       const container = document.getElementById("catalogContainer");
       container.innerHTML = "";
@@ -353,13 +214,8 @@
         return matchCat && matchSearch;
       });
 
-      if(filtered.length === 0) {
-        document.getElementById("emptyState").hidden = false;
-        return;
-      }
-      document.getElementById("emptyState").hidden = true;
+      document.getElementById("emptyState").hidden = filtered.length > 0;
 
-      // Agrupar por categoria
       const grouped = {};
       filtered.forEach(p => {
         if(!grouped[p.category]) grouped[p.category] = [];
@@ -378,25 +234,24 @@
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-            <img class="productImage" src="${p.image_url}" onclick="showImg('${p.image_url}')">
+            <img class="productImage" src="${p.image_url}" onclick="showImg('${p.image_url}')" loading="lazy">
             <div class="card__body">
               <h3 class="card__title">${p.title}</h3>
               <div class="card__meta">
-                <span>${p.category}</span>
-                <strong>R$ ${p.price.toFixed(2).replace('.',',')}</strong>
+                <span style="color:var(--muted); font-size:14px;">${p.category}</span>
+                <strong style="color:var(--accent)">R$ ${p.price.toFixed(2).replace('.',',')}</strong>
               </div>
-              <button class="buyBtn" onclick="sendWhatapp('${p.title}', ${p.price})">Pedir agora</button>
+              <button class="buyBtn" onclick="sendWhatapp('${p.title}', ${p.price})">Pedir via WhatsApp</button>
             </div>
           `;
           grid.appendChild(card);
         });
-
         section.appendChild(grid);
         container.appendChild(section);
       }
     }
 
-    /* SALVAR PRODUTO NO SUPABASE */
+    /* AÇÕES ADMIN */
     document.getElementById("saveProductBtn").onclick = async () => {
       const title = document.getElementById("productTitle").value;
       const category = document.getElementById("productCategory").value;
@@ -404,50 +259,103 @@
       const fileInput = document.getElementById("productImage");
       const btn = document.getElementById("saveProductBtn");
 
-      if(!title || !fileInput.files[0]) return alert("Preencha tudo!");
+      if(!title || !price || !fileInput.files[0]) return alert("Por favor, preencha todos os campos e selecione uma imagem.");
 
       btn.disabled = true;
-      btn.textContent = "Enviando...";
+      btn.textContent = "Processando...";
 
       try {
         const file = fileInput.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${Date.now()}-${file.name}`;
         const filePath = `produtos/${fileName}`;
 
-        // 1. Upload Imagem
+        // 1. Upload
         const { error: uploadError } = await _supabase.storage
           .from('imagens-produtos')
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        // 2. Pegar URL Pública
+        // 2. URL
         const { data: { publicUrl } } = _supabase.storage
           .from('imagens-produtos')
           .getPublicUrl(filePath);
 
-        // 3. Salvar no Banco
+        // 3. Banco
         const { error: insertError } = await _supabase
           .from('produtos')
           .insert([{ title, category, price: parseFloat(price), image_url: publicUrl }]);
 
         if (insertError) throw insertError;
 
-        alert("Produto salvo!");
+        alert("Produto cadastrado com sucesso!");
         location.reload();
-
       } catch (err) {
-        alert("Erro: " + err.message);
+        alert("Erro técnico: " + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Salvar no Supabase";
+        btn.textContent = "Salvar Produto";
       }
     };
 
-    /* FUNÇÕES AUXILIARES */
+    async function deleteProd(id, imageUrl) {
+      if(!confirm("Tem certeza que deseja excluir este produto?")) return;
+      
+      const { error } = await _supabase.from('produtos').delete().eq('id', id);
+      if(!error) {
+        alert("Removido!");
+        location.reload();
+      } else {
+        alert("Erro ao excluir: " + error.message);
+      }
+    }
+
+    /* AUTH LOGIC */
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("Acesso Negado: " + error.message);
+      } else {
+        document.getElementById("loginModal").classList.remove("active");
+        checkUser();
+        openAdminPanel();
+      }
+    };
+
+    document.getElementById("logoutBtn").onclick = async () => {
+      await _supabase.auth.signOut();
+      location.reload();
+    };
+
+    async function checkUser() {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if(user) {
+        document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("openAdminBtn").textContent = "Painel Aberto";
+      }
+    }
+
+    function openAdminPanel() {
+      document.getElementById("adminModal").classList.add("active");
+      const list = document.getElementById("adminList");
+      list.innerHTML = products.map(p => `
+        <div class="adminItem">
+          <img src="${p.image_url}">
+          <div class="adminItem__info">
+            <strong>${p.title}</strong><br>R$ ${p.price.toFixed(2)}
+          </div>
+          <button class="dangerBtn" onclick="deleteProd('${p.id}')">Excluir</button>
+        </div>
+      `).join('');
+    }
+
+    /* AUXILIARES */
     function sendWhatapp(nome, preco) {
-      const msg = encodeURIComponent(`Olá! Quero pedir: ${nome} (R$ ${preco.toFixed(2)})`);
+      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${nome} (R$ ${preco.toFixed(2)})`);
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
     }
 
@@ -456,58 +364,16 @@
       document.getElementById("imagePreviewModal").classList.add("active");
     }
 
-    /* ADMIN LIST E DELETE */
-    async function renderAdminList() {
-      const list = document.getElementById("adminList");
-      list.innerHTML = "<h3>Itens Cadastrados</h3>";
-      
-      products.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "adminItem";
-        div.innerHTML = `
-          <img src="${p.image_url}">
-          <div class="adminItem__info">
-            <strong>${p.title}</strong><br><small>${p.category}</small>
-          </div>
-          <button class="dangerBtn" onclick="deleteProd('${p.id}', '${p.image_url}')">Excluir</button>
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    window.deleteProd = async (id, url) => {
-      if(!confirm("Deseja excluir?")) return;
-      
-      // Deletar do banco
-      const { error } = await _supabase.from('produtos').delete().eq('id', id);
-      
-      if(!error) {
-        alert("Excluído!");
-        location.reload();
-      }
+    document.getElementById("openAdminBtn").onclick = async () => {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if(user) openAdminPanel();
+      else document.getElementById("loginModal").classList.add("active");
     };
 
-    /* CONTROLE DE MODAIS */
-    document.getElementById("openAdminBtn").onclick = () => document.getElementById("loginModal").classList.add("active");
     document.getElementById("closeLoginBtn").onclick = () => document.getElementById("loginModal").classList.remove("active");
     document.getElementById("closeAdminBtn").onclick = () => document.getElementById("adminModal").classList.remove("active");
+    document.getElementById("searchInput").oninput = (e) => { searchQuery = e.target.value; renderGrid(); };
 
-    document.getElementById("loginBtn").onclick = () => {
-      if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
-        document.getElementById("loginModal").classList.remove("active");
-        document.getElementById("adminModal").classList.add("active");
-        renderAdminList();
-      } else {
-        alert("Senha incorreta");
-      }
-    };
-
-    document.getElementById("searchInput").oninput = (e) => {
-      searchQuery = e.target.value;
-      renderGrid();
-    };
-
-    // Inicia o App
     init();
   </script>
 </body>
