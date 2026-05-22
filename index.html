@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kn2 Personalizados - Catálogo</title>
+  <title>Kn2 Personalizados - Catálogo Profissional</title>
   <meta name="theme-color" content="#0b0f17">
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,61 +20,62 @@
       --danger: #ef4444;
     }
 
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; outline: none; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }
     .container { width: min(1100px, 92vw); margin: auto; }
 
-    /* Topbar */
-    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    /* Header */
+    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
     .topbar__inner { padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 22px; font-weight: 800; background: linear-gradient(to right, #22c55e, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
-    .adminBtn { border: none; background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-    .logoutBtn { background: #374151; margin-left: 10px; display: none; }
+    .btn { border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 14px; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: white; }
+    .btn-logout { background: #374151; color: white; display: none; margin-left: 8px; }
 
-    /* Menu & Search */
-    .menu { margin-top: 20px; }
-    .menu__row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: 0.2s; }
-    .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
+    /* Navegação de Categorias */
+    .menu { margin-top: 25px; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+    .menu__row { display: flex; gap: 8px; }
+    .menu__btn { padding: 8px 20px; border-radius: 999px; border: 1px solid var(--border); background: #111827; color: var(--muted); cursor: pointer; transition: 0.3s; }
+    .menu__btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
 
-    .search { margin: 18px 0; }
-    #searchInput { width: 100%; padding: 13px; border-radius: 12px; border: 1px solid var(--border); background: #111827; color: white; outline: none; }
+    /* Busca */
+    .search { margin: 20px 0; }
+    .search input { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: white; font-size: 16px; }
 
-    /* Grid */
-    .categoryBlock { margin-bottom: 40px; }
-    .categoryHeading { font-size: 24px; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border); color: #fff; }
-    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    /* Grid de Produtos */
+    .categoryBlock { margin-bottom: 50px; }
+    .categoryHeading { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .categoryHeading::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    
+    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
 
-    .card { overflow: hidden; border-radius: 18px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.2s; }
-    .card:hover { transform: translateY(-4px); }
-    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; background: #1f2937; }
+    .card { border-radius: 20px; background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; overflow: hidden; }
+    .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+    .productImage { width: 100%; height: 250px; object-fit: cover; cursor: zoom-in; background: #1f2937; }
 
-    .card__body { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
-    .card__title { margin: 0 0 10px; font-size: 18px; }
-    .card__meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; margin-bottom: 14px; }
-    .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .card__body { padding: 18px; display: flex; flex-direction: column; flex-grow: 1; }
+    .card__title { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+    .card__price { font-size: 20px; font-weight: 800; color: var(--accent); margin-bottom: 15px; }
+    .buyBtn { width: 100%; padding: 12px; border-radius: 12px; background: var(--accent); color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
     /* Modais */
-    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .7); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(6px); }
     .modal.active { display: flex; }
-    .modal__content { width: min(500px, 92vw); max-height: 90vh; overflow: auto; background: #111827; border-radius: 20px; padding: 25px; border: 1px solid var(--border); }
+    .modal__content { width: min(600px, 92vw); max-height: 85vh; overflow-y: auto; background: #111827; border-radius: 24px; padding: 30px; border: 1px solid var(--border); }
 
-    .formGroup { margin-bottom: 15px; }
-    .formGroup label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 14px; }
-    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: white; }
-
-    .saveBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 13px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-    .closeBtn { width: 100%; border: none; background: #374151; color: white; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
+    .formGroup { margin-bottom: 18px; }
+    .formGroup label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
+    .formGroup input, .formGroup select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 15px; }
 
     /* Admin List */
-    .adminItem { display: flex; gap: 12px; align-items: center; background: #0f172a; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
-    .adminItem img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-    .adminItem__info { flex: 1; font-size: 14px; }
-    .dangerBtn { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-
-    .imagePreviewModal { position: fixed; inset: 0; background: rgba(0, 0, 0, .9); display: none; justify-content: center; align-items: center; z-index: 99999; }
-    .imagePreviewModal.active { display: flex; }
-    .imagePreviewModal img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+    .admin-category-section { margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
+    .adminItem { display: flex; gap: 15px; align-items: center; background: #0f172a; padding: 12px; border-radius: 16px; margin-bottom: 12px; border: 1px solid transparent; }
+    .adminItem img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+    .adminItem__info { flex: 1; }
+    .dangerBtn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
 
     @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
   </style>
@@ -84,10 +85,10 @@
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <h1 style="margin:0; font-size: 32px;">Kn2 Catálogo</h1>
+      <div class="brand">Kn2 Catálogo</div>
       <div>
-        <button class="adminBtn" id="openAdminBtn">Painel Admin</button>
-        <button class="adminBtn logoutBtn" id="logoutBtn">Sair</button>
+        <button class="btn btn-primary" id="openAdminBtn">Gerenciar</button>
+        <button class="btn btn-logout" id="logoutBtn">Sair</button>
       </div>
     </div>
   </header>
@@ -98,58 +99,65 @@
     </section>
 
     <section class="search">
-      <input type="text" id="searchInput" placeholder="O que você está procurando?" />
+      <input type="text" id="searchInput" placeholder="Pesquisar em todas as categorias..." />
     </section>
 
     <section id="catalogContainer"></section>
-    <p id="emptyState" hidden style="text-align:center; padding:40px; color:gray;">Nenhum produto encontrado.</p>
+    <div id="emptyState" hidden style="text-align:center; padding:60px;">
+      <p style="color:var(--muted); font-size: 18px;">Nenhum item encontrado.</p>
+    </div>
   </main>
 
   <div class="modal" id="loginModal">
     <div class="modal__content">
-      <h2 style="margin-top:0">Login Restrito</h2>
+      <h2 style="margin:0 0 20px">Acesso Administrativo</h2>
       <div class="formGroup">
-        <label>E-mail do Admin</label>
-        <input type="email" id="adminEmail" placeholder="seu@email.com" />
+        <label>E-mail</label>
+        <input type="email" id="adminEmail" placeholder="admin@exemplo.com" />
       </div>
       <div class="formGroup">
         <label>Senha</label>
         <input type="password" id="adminPassword" />
       </div>
-      <button class="saveBtn" id="loginBtn">Entrar no Sistema</button>
-      <button class="closeBtn" id="closeLoginBtn">Cancelar</button>
+      <button class="btn btn-primary" style="width:100%" id="loginBtn">Entrar</button>
+      <button class="btn btn-outline" style="width:100%; margin-top:10px;" id="closeLoginBtn">Voltar</button>
     </div>
   </div>
 
   <div class="modal" id="adminModal">
-    <div class="modal__content" style="width: min(700px, 92vw);">
-      <h2 style="margin-top:0">Novo Produto</h2>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="formGroup">
-          <label>Nome</label>
-          <input type="text" id="productTitle" />
-        </div>
-        <div class="formGroup">
-          <label>Categoria</label>
-          <input type="text" id="productCategory" placeholder="Ex: Copos" />
-        </div>
+    <div class="modal__content">
+      <h2 style="margin:0 0 20px">Adicionar Produto</h2>
+      
+      <div class="formGroup">
+        <label>Nome do Produto</label>
+        <input type="text" id="productTitle" placeholder="Ex: Copo Térmico 500ml" />
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+
+      <div class="formGroup">
+        <label>Categoria (Selecione ou digite uma nova)</label>
+        <input list="categoriesList" id="productCategory" placeholder="Ex: Copos, Brindes, Camisetas...">
+        <datalist id="categoriesList"></datalist>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
         <div class="formGroup">
           <label>Preço (R$)</label>
           <input type="number" id="productPrice" step="0.01" />
         </div>
         <div class="formGroup">
-          <label>Foto do Produto</label>
+          <label>Foto</label>
           <input type="file" id="productImage" accept="image/*" />
         </div>
       </div>
-      <button class="saveBtn" id="saveProductBtn">Salvar Produto</button>
+
+      <button class="btn btn-primary" style="width:100%" id="saveProductBtn">Publicar no Catálogo</button>
       
-      <hr style="opacity:0.1; margin: 25px 0;">
-      <h3>Gerenciar Existentes</h3>
-      <div id="adminList"></div>
-      <button class="closeBtn" id="closeAdminBtn">Fechar Painel</button>
+      <div class="admin-category-section">
+        <h3>Produtos Cadastrados</h3>
+        <div id="adminList"></div>
+      </div>
+      
+      <button class="btn btn-outline" style="width:100%; margin-top:20px;" id="closeAdminBtn">Fechar Painel</button>
     </div>
   </div>
 
@@ -158,11 +166,9 @@
   </div>
 
   <script>
-    /* CONFIGURAÇÃO */
     const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co/";
     const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     const WHATSAPP_NUMBER = "5531999683959";
 
     let products = [];
@@ -171,21 +177,26 @@
 
     async function init() {
       await fetchProducts();
-      checkUser(); // Verifica se já está logado
+      checkUser();
       renderMenu();
       renderGrid();
+      updateCategoryDatalist();
     }
 
     async function fetchProducts() {
       const { data, error } = await _supabase
         .from('produtos')
         .select('*')
-        .order('created_at', { ascending: false });
-      
+        .order('category', { ascending: true });
       if (!error) products = data || [];
     }
 
-    /* RENDERIZAÇÃO */
+    function updateCategoryDatalist() {
+      const datalist = document.getElementById("categoriesList");
+      const categories = [...new Set(products.map(p => p.category))];
+      datalist.innerHTML = categories.map(cat => `<option value="${cat}">`).join('');
+    }
+
     function renderMenu() {
       const menuRow = document.getElementById("menuRow");
       menuRow.innerHTML = "";
@@ -234,14 +245,13 @@
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-            <img class="productImage" src="${p.image_url}" onclick="showImg('${p.image_url}')" loading="lazy">
+            <img class="productImage" src="${p.image_url}" onclick="showImg('${p.image_url}')" alt="${p.title}">
             <div class="card__body">
               <h3 class="card__title">${p.title}</h3>
-              <div class="card__meta">
-                <span style="color:var(--muted); font-size:14px;">${p.category}</span>
-                <strong style="color:var(--accent)">R$ ${p.price.toFixed(2).replace('.',',')}</strong>
-              </div>
-              <button class="buyBtn" onclick="sendWhatapp('${p.title}', ${p.price})">Pedir via WhatsApp</button>
+              <div class="card__price">R$ ${p.price.toFixed(2).replace('.',',')}</div>
+              <button class="buyBtn" onclick="sendWhatapp('${p.title}', ${p.price})">
+                Pedir agora
+              </button>
             </div>
           `;
           grid.appendChild(card);
@@ -251,7 +261,6 @@
       }
     }
 
-    /* AÇÕES ADMIN */
     document.getElementById("saveProductBtn").onclick = async () => {
       const title = document.getElementById("productTitle").value;
       const category = document.getElementById("productCategory").value;
@@ -259,71 +268,59 @@
       const fileInput = document.getElementById("productImage");
       const btn = document.getElementById("saveProductBtn");
 
-      if(!title || !price || !fileInput.files[0]) return alert("Por favor, preencha todos os campos e selecione uma imagem.");
+      if(!title || !category || !price || !fileInput.files[0]) return alert("Preencha todos os campos!");
 
       btn.disabled = true;
-      btn.textContent = "Processando...";
+      btn.textContent = "Salvando...";
 
       try {
         const file = fileInput.files[0];
         const fileName = `${Date.now()}-${file.name}`;
-        const filePath = `produtos/${fileName}`;
-
-        // 1. Upload
         const { error: uploadError } = await _supabase.storage
           .from('imagens-produtos')
-          .upload(filePath, file);
+          .upload(`produtos/${fileName}`, file);
 
         if (uploadError) throw uploadError;
 
-        // 2. URL
         const { data: { publicUrl } } = _supabase.storage
           .from('imagens-produtos')
-          .getPublicUrl(filePath);
+          .getPublicUrl(`produtos/${fileName}`);
 
-        // 3. Banco
         const { error: insertError } = await _supabase
           .from('produtos')
           .insert([{ title, category, price: parseFloat(price), image_url: publicUrl }]);
 
         if (insertError) throw insertError;
 
-        alert("Produto cadastrado com sucesso!");
+        alert("Produto adicionado com sucesso!");
         location.reload();
       } catch (err) {
-        alert("Erro técnico: " + err.message);
+        alert("Erro: " + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Salvar Produto";
+        btn.textContent = "Publicar no Catálogo";
       }
     };
 
-    async function deleteProd(id, imageUrl) {
-      if(!confirm("Tem certeza que deseja excluir este produto?")) return;
-      
+    async function deleteProd(id) {
+      if(!confirm("Excluir este produto permanentemente?")) return;
       const { error } = await _supabase.from('produtos').delete().eq('id', id);
-      if(!error) {
-        alert("Removido!");
-        location.reload();
-      } else {
-        alert("Erro ao excluir: " + error.message);
+      if(!error) location.reload();
+    }
+
+    async function checkUser() {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if(user) {
+        document.getElementById("logoutBtn").style.display = "block";
       }
     }
 
-    /* AUTH LOGIC */
     document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("adminEmail").value;
       const password = document.getElementById("adminPassword").value;
-
-      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        alert("Acesso Negado: " + error.message);
-      } else {
-        document.getElementById("loginModal").classList.remove("active");
-        checkUser();
-        openAdminPanel();
-      }
+      const { error } = await _supabase.auth.signInWithPassword({ email, password });
+      if (error) alert("Dados incorretos!");
+      else location.reload();
     };
 
     document.getElementById("logoutBtn").onclick = async () => {
@@ -331,31 +328,38 @@
       location.reload();
     };
 
-    async function checkUser() {
-      const { data: { user } } = await _supabase.auth.getUser();
-      if(user) {
-        document.getElementById("logoutBtn").style.display = "block";
-        document.getElementById("openAdminBtn").textContent = "Painel Aberto";
-      }
-    }
-
     function openAdminPanel() {
       document.getElementById("adminModal").classList.add("active");
       const list = document.getElementById("adminList");
-      list.innerHTML = products.map(p => `
-        <div class="adminItem">
-          <img src="${p.image_url}">
-          <div class="adminItem__info">
-            <strong>${p.title}</strong><br>R$ ${p.price.toFixed(2)}
-          </div>
-          <button class="dangerBtn" onclick="deleteProd('${p.id}')">Excluir</button>
-        </div>
-      `).join('');
+      
+      // Agrupar lista admin por categoria para facilitar
+      const grouped = {};
+      products.forEach(p => {
+        if(!grouped[p.category]) grouped[p.category] = [];
+        grouped[p.category].push(p);
+      });
+
+      list.innerHTML = "";
+      for(const cat in grouped) {
+        const groupDiv = document.createElement('div');
+        groupDiv.innerHTML = `<h4 style="margin: 15px 0 10px; color:var(--accent)">${cat}</h4>`;
+        grouped[cat].forEach(p => {
+          groupDiv.innerHTML += `
+            <div class="adminItem">
+              <img src="${p.image_url}">
+              <div class="adminItem__info">
+                <strong>${p.title}</strong><br><small>R$ ${p.price.toFixed(2)}</small>
+              </div>
+              <button class="dangerBtn" onclick="deleteProd('${p.id}')">Excluir</button>
+            </div>
+          `;
+        });
+        list.appendChild(groupDiv);
+      }
     }
 
-    /* AUXILIARES */
     function sendWhatapp(nome, preco) {
-      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${nome} (R$ ${preco.toFixed(2)})`);
+      const msg = encodeURIComponent(`Olá Kn2! Gostaria de encomendar: ${nome} (R$ ${preco.toFixed(2)})`);
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
     }
 
