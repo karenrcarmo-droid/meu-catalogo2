@@ -68,7 +68,7 @@
 
     .formGroup { margin-bottom: 18px; }
     .formGroup label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
-    .formGroup input, .formGroup select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 15px; }
+    .formGroup input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 15px; }
 
     /* Admin List */
     .admin-category-section { margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
@@ -76,6 +76,32 @@
     .adminItem img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
     .adminItem__info { flex: 1; }
     .dangerBtn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+
+    /* CORREÇÃO DO ZOOM */
+    .imagePreviewModal { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0, 0, 0, .9); 
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 99999; /* Maior que todos os outros modais */
+      cursor: zoom-out;
+      padding: 20px;
+    }
+    .imagePreviewModal.active { display: flex; }
+    .imagePreviewModal img { 
+      max-width: 100%; 
+      max-height: 100%; 
+      border-radius: 8px; 
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      animation: zoomIn 0.3s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
 
     @media(max-width:600px) { .productsGrid { grid-template-columns: 1fr; } }
   </style>
@@ -134,8 +160,8 @@
       </div>
 
       <div class="formGroup">
-        <label>Categoria (Selecione ou digite uma nova)</label>
-        <input list="categoriesList" id="productCategory" placeholder="Ex: Copos, Brindes, Camisetas...">
+        <label>Categoria</label>
+        <input list="categoriesList" id="productCategory" placeholder="Ex: Copos, Brindes...">
         <datalist id="categoriesList"></datalist>
       </div>
 
@@ -162,7 +188,7 @@
   </div>
 
   <div class="imagePreviewModal" id="imagePreviewModal" onclick="this.classList.remove('active')">
-    <img id="previewImage" src="" />
+    <img id="previewImage" src="" alt="Zoom" />
   </div>
 
   <script>
@@ -298,21 +324,18 @@
         alert("Erro: " + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Publicar no Catálogo";
       }
     };
 
     async function deleteProd(id) {
-      if(!confirm("Excluir este produto permanentemente?")) return;
+      if(!confirm("Excluir este produto?")) return;
       const { error } = await _supabase.from('produtos').delete().eq('id', id);
       if(!error) location.reload();
     }
 
     async function checkUser() {
       const { data: { user } } = await _supabase.auth.getUser();
-      if(user) {
-        document.getElementById("logoutBtn").style.display = "block";
-      }
+      if(user) document.getElementById("logoutBtn").style.display = "block";
     }
 
     document.getElementById("loginBtn").onclick = async () => {
@@ -332,7 +355,6 @@
       document.getElementById("adminModal").classList.add("active");
       const list = document.getElementById("adminList");
       
-      // Agrupar lista admin por categoria para facilitar
       const grouped = {};
       products.forEach(p => {
         if(!grouped[p.category]) grouped[p.category] = [];
@@ -344,15 +366,16 @@
         const groupDiv = document.createElement('div');
         groupDiv.innerHTML = `<h4 style="margin: 15px 0 10px; color:var(--accent)">${cat}</h4>`;
         grouped[cat].forEach(p => {
-          groupDiv.innerHTML += `
-            <div class="adminItem">
-              <img src="${p.image_url}">
-              <div class="adminItem__info">
-                <strong>${p.title}</strong><br><small>R$ ${p.price.toFixed(2)}</small>
-              </div>
-              <button class="dangerBtn" onclick="deleteProd('${p.id}')">Excluir</button>
+          const item = document.createElement('div');
+          item.className = 'adminItem';
+          item.innerHTML = `
+            <img src="${p.image_url}">
+            <div class="adminItem__info">
+              <strong>${p.title}</strong><br><small>R$ ${p.price.toFixed(2)}</small>
             </div>
+            <button class="dangerBtn" onclick="deleteProd('${p.id}')">Excluir</button>
           `;
+          groupDiv.appendChild(item);
         });
         list.appendChild(groupDiv);
       }
@@ -363,9 +386,12 @@
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
     }
 
+    // FUNÇÃO DE ZOOM (CORRIGIDA)
     function showImg(url) {
-      document.getElementById("previewImage").src = url;
-      document.getElementById("imagePreviewModal").classList.add("active");
+      const modal = document.getElementById("imagePreviewModal");
+      const img = document.getElementById("previewImage");
+      img.src = url;
+      modal.classList.add("active");
     }
 
     document.getElementById("openAdminBtn").onclick = async () => {
