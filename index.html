@@ -3,56 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kn2 Personalizados | Premium</title>
+    <title>Kn2 Personalizados | Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #0b0f17; --card: rgba(255, 255, 255, 0.03); 
             --muted: #9ca3af; --text: #f3f4f6;
-            --border: rgba(255, 255, 255, 0.08); --accent: #22c55e; 
-            --danger: #ef4444; --glass: blur(12px);
+            --border: rgba(255, 255, 255, 0.1); --accent: #22c55e; 
+            --danger: #ef4444; --glass: blur(15px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
         .container { width: min(1200px, 94vw); margin: auto; }
         
         /* HEADER */
-        .topbar { position: sticky; top: 0; z-index: 1000; background: rgba(11, 15, 23, 0.7); backdrop-filter: var(--glass); border-bottom: 1px solid var(--border); padding: 14px 0; }
+        .topbar { position: sticky; top: 0; z-index: 1000; background: rgba(11, 15, 23, 0.8); backdrop-filter: var(--glass); border-bottom: 1px solid var(--border); padding: 15px 0; }
         .topbar__inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 22px; font-weight: 900; color: #fff; text-decoration: none; }
+        .logo { font-size: 22px; font-weight: 900; color: #fff; text-decoration: none; letter-spacing: -1px; }
         .logo span { color: var(--accent); }
 
         /* CATEGORIAS */
-        .cat-nav { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; margin-bottom: 20px; }
-        .cat-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .cat-btn.active { background: var(--accent); color: #000; font-weight: bold; }
+        .cat-nav { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; scrollbar-width: none; }
+        .cat-nav::-webkit-scrollbar { display: none; }
+        .cat-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: 600; }
+        .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-        /* GRID E CARDS */
-        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.4s; }
-        .card:hover { transform: translateY(-8px); border-color: var(--accent); }
+        /* CARDS */
+        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 10px; }
+        .card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: var(--glass); }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
         
-        .img-container { width: 100%; height: 260px; overflow: hidden; position: relative; }
+        .img-container { width: 100%; height: 280px; overflow: hidden; position: relative; }
         .productImage { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; cursor: pointer; }
+        .card:hover .productImage { transform: scale(1.1); }
         
-        /* SISTEMA DE LIKES */
-        .like-container { position: absolute; top: 15px; right: 15px; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 10; }
-        .btn-like { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; transition: 0.3s; padding: 0; }
-        .btn-like.active { color: var(--danger); animation: pulse 0.4s ease; }
-        .like-count { font-size: 11px; font-weight: bold; color: #fff; }
+        /* LIKES */
+        .like-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(5px); z-index: 10; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .like-badge:active { transform: scale(1.3); }
+        .heart-icon { color: var(--danger); font-size: 16px; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.4); }
-            100% { transform: scale(1); }
-        }
-
-        .btn { border: none; cursor: pointer; border-radius: 12px; padding: 10px 18px; font-weight: 700; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; color: white; text-decoration: none; }
+        .btn { border: none; cursor: pointer; border-radius: 12px; padding: 12px 20px; font-weight: 700; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; color: white; text-decoration: none; }
         .btn-primary { background: var(--accent); color: #000; }
         .btn-dark { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
 
-        footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 50px; }
+        /* MODAIS */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 5000; padding: 20px; backdrop-filter: blur(10px); }
+        .modal.active { display: flex; }
+        .modal__content { background: #111827; padding: 30px; border-radius: 28px; width: min(500px, 100%); border: 1px solid var(--border); }
+        
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; width: 100%; margin-bottom: 15px; outline: none; }
+        
+        footer { text-align: center; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 50px; }
     </style>
 </head>
 <body>
@@ -68,23 +70,40 @@
     </header>
 
     <main class="container">
-        <div style="margin-top: 20px;"><input type="text" id="searchInput" placeholder="Buscar produto..."></div>
+        <div style="margin: 25px 0;">
+            <input type="text" id="searchInput" placeholder="O que você deseja personalizar hoje?">
+        </div>
+
         <div class="cat-nav" id="categoryNav"></div>
         <div id="catalogContainer"></div>
     </main>
 
-    <div class="modal" id="zoomModal" onclick="this.classList.remove('active')" style="display: none; position: fixed; inset:0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center;">
-        <img id="zoomImg" src="" style="max-width: 90%; max-height: 80vh; border-radius: 20px;">
+    <div class="modal" id="zoomModal" onclick="this.classList.remove('active')">
+        <img id="zoomImg" src="" style="max-width: 95%; max-height: 85vh; border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.5);">
+    </div>
+
+    <div class="modal" id="adminModal">
+        <div class="modal__content">
+            <h3 id="admTitle" style="margin-bottom: 20px;">Novo Produto</h3>
+            <input type="hidden" id="editId">
+            <input type="text" id="pTitle" placeholder="Nome do Produto">
+            <input type="text" id="pCat" placeholder="Categoria">
+            <input type="number" id="pPrice" placeholder="Preço (Ex: 45.90)">
+            <input type="file" id="pImage">
+            <button class="btn btn-primary" id="saveBtn" style="width: 100%;">Salvar Produto</button>
+            <div id="adminList" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+            <button class="btn btn-dark" onclick="closeAdmin()" style="width: 100%; margin-top: 10px;">Fechar</button>
+        </div>
     </div>
 
     <footer>
         <p>Kn2 Personalizados © 2024</p>
-        <div style="margin: 15px 0;">
-            <a href="https://www.instagram.com/arteskn2" target="_blank" style="color: var(--accent); text-decoration: none;">Instagram 📸</a>
+        <div style="margin: 20px 0;">
+            <a href="https://www.instagram.com/arteskn2" target="_blank" class="btn btn-dark" style="border-radius: 50px;">Siga-nos no Instagram 📸</a>
         </div>
-        <p style="font-size: 13px; background: rgba(255,255,255,0.05); display: inline-block; padding: 5px 15px; border-radius: 20px;">
-            👁️ <span id="visitorCount">Carregando...</span> visitas reais
-        </p>
+        <div style="font-size: 14px; color: var(--muted); background: rgba(255,255,255,0.03); padding: 8px 20px; display: inline-block; border-radius: 20px;">
+            Sincronizado: <span id="visitorCount" style="color: var(--accent); font-weight: bold;">...</span> visitas
+        </div>
     </footer>
 
     <script>
@@ -93,29 +112,27 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let products = [];
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
         let query = "";
         let currentCat = "Todos";
 
         async function init() {
-            handleVisits();
+            await handleVisits();
             await loadProducts();
             setupRealtime();
             renderCategories();
             renderGrid();
         }
 
-        // --- CONTADOR DE VISITAS REAL (via Banco) ---
+        // --- VISITAS REAIS ---
         async function handleVisits() {
-            // Incrementa no banco
-            await _supabase.rpc('increment_visits'); 
-            // Se não quiser usar RPC, pode usar um update simples:
-            const { data } = await _supabase.from('estatisticas').select('visitas').eq('id', 1).single();
-            if(data) {
-                const novoTotal = data.visitas + 1;
-                await _supabase.from('estatisticas').update({ visitas: novoTotal }).eq('id', 1);
-                document.getElementById('visitorCount').innerText = novoTotal.toLocaleString();
-            }
+            try {
+                const { data } = await _supabase.from('estatisticas').select('visitas').eq('id', 1).single();
+                if(data) {
+                    const total = data.visitas + 1;
+                    await _supabase.from('estatisticas').update({ visitas: total }).eq('id', 1);
+                    document.getElementById('visitorCount').innerText = total.toLocaleString();
+                }
+            } catch(e) { console.log("Erro visitas:", e); }
         }
 
         async function loadProducts() {
@@ -124,64 +141,30 @@
         }
 
         function setupRealtime() {
-            _supabase.channel('db-all').on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
-                loadProducts().then(() => renderGrid());
+            _supabase.channel('public:produtos').on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, (payload) => {
+                if(payload.eventType === 'UPDATE') {
+                    const idx = products.findIndex(p => p.id === payload.new.id);
+                    if(idx !== -1) products[idx] = payload.new;
+                } else {
+                    loadProducts().then(() => { renderCategories(); renderGrid(); });
+                    return;
+                }
+                renderGrid();
             }).subscribe();
         }
 
-        // --- SISTEMA DE LIKES REAL ---
-        async function toggleLike(id, event) {
+        // --- LIKES REAIS ---
+        async function addLike(id, event) {
             event.stopPropagation();
-            const btn = event.currentTarget;
-            const isLiked = btn.classList.contains('active');
+            const p = products.find(prod => prod.id == id);
+            const newLikes = (p.likes || 0) + 1;
             
-            // Lógica otimista (muda na tela antes do banco)
-            const product = products.find(p => p.id == id);
-            if(!isLiked) {
-                product.likes = (product.likes || 0) + 1;
-                btn.classList.add('active');
-                await _supabase.from('produtos').update({ likes: product.likes }).eq('id', id);
-            }
-        }
+            // UI instantânea (liso)
+            p.likes = newLikes;
+            renderGrid();
 
-        function renderGrid() {
-            const container = document.getElementById('catalogContainer');
-            container.innerHTML = "";
-            
-            const filtered = products.filter(p => 
-                (currentCat === "Todos" || p.category === currentCat) &&
-                p.title.toLowerCase().includes(query.toLowerCase())
-            );
-
-            const catsInGrid = [...new Set(filtered.map(p => p.category))];
-            catsInGrid.forEach(cat => {
-                const section = document.createElement('div');
-                section.innerHTML = `<h2 style="margin: 40px 0 20px; font-size: 14px; text-transform: uppercase; color: var(--accent); letter-spacing: 1px;">${cat}</h2>`;
-                const grid = document.createElement('div');
-                grid.className = 'productsGrid';
-                
-                filtered.filter(p => p.category === cat).forEach(p => {
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div class="like-container">
-                                <button class="btn-like" onclick="toggleLike('${p.id}', event)">❤</button>
-                                <span class="like-count">${p.likes || 0}</span>
-                            </div>
-                            <div class="img-container">
-                                <img src="${p.image_url}" class="productImage" onclick="openZoom('${p.image_url}')">
-                            </div>
-                            <div class="card__body">
-                                <h4 style="margin-bottom:12px; font-size:15px;">${p.title}</h4>
-                                <div style="display:flex; justify-content:space-between; align-items:center">
-                                    <span style="font-weight:900; color:var(--accent); font-size:18px;">R$ ${p.price.toFixed(2)}</span>
-                                    <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="padding: 8px 12px; font-size:13px;">Add</button>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                section.appendChild(grid);
-                container.appendChild(section);
-            });
+            // Banco de dados
+            await _supabase.from('produtos').update({ likes: newLikes }).eq('id', id);
         }
 
         function renderCategories() {
@@ -193,12 +176,131 @@
         }
 
         function filterCat(c) { currentCat = c; renderCategories(); renderGrid(); }
-        function openZoom(url) { 
-            const m = document.getElementById('zoomModal');
-            document.getElementById('zoomImg').src = url;
-            m.style.display = 'flex';
+
+        function renderGrid() {
+            const container = document.getElementById('catalogContainer');
+            container.innerHTML = "";
+            
+            const filtered = products.filter(p => 
+                (currentCat === "Todos" || p.category === currentCat) &&
+                p.title.toLowerCase().includes(query.toLowerCase())
+            );
+
+            const sections = [...new Set(filtered.map(p => p.category))];
+            sections.forEach(cat => {
+                const div = document.createElement('div');
+                div.innerHTML = `<h3 style="margin: 40px 0 20px; color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">${cat}</h3>`;
+                const grid = document.createElement('div');
+                grid.className = 'productsGrid';
+                
+                filtered.filter(p => p.category === cat).forEach(p => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <div class="like-badge" onclick="addLike('${p.id}', event)">
+                                <span class="heart-icon">❤</span>
+                                <span style="font-size: 12px; font-weight: bold;">${p.likes || 0}</span>
+                            </div>
+                            <div class="img-container">
+                                <img src="${p.image_url}" class="productImage" onclick="openZoom('${p.image_url}')">
+                            </div>
+                            <div class="card__body">
+                                <h4 style="margin-bottom:10px; font-size: 16px;">${p.title}</h4>
+                                <div style="display:flex; justify-content:space-between; align-items:center">
+                                    <span style="font-weight:900; color:var(--accent); font-size: 1.2rem;">R$ ${p.price.toFixed(2)}</span>
+                                    <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="padding: 8px 15px; font-size: 13px;">Add</button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                div.appendChild(grid);
+                container.appendChild(div);
+            });
         }
-        
+
+        function openZoom(url) {
+            document.getElementById('zoomImg').src = url;
+            document.getElementById('zoomModal').classList.add('active');
+        }
+
+        // --- ADMIN / EDIÇÃO ---
+        document.getElementById('adminBtn').onclick = async () => {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (user) {
+                document.getElementById('adminModal').classList.add('active');
+                renderAdminList();
+            } else {
+                const email = prompt("E-mail:");
+                const password = prompt("Senha:");
+                const { error } = await _supabase.auth.signInWithPassword({ email, password });
+                if(!error) location.reload(); else alert("Acesso Negado");
+            }
+        };
+
+        function renderAdminList() {
+            const list = document.getElementById('adminList');
+            list.innerHTML = products.map(p => `
+                <div style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:10px;">
+                    <span style="font-size: 13px;">${p.title}</span>
+                    <div>
+                        <button onclick="editProd('${p.id}')" style="color:var(--accent); background:none; border:none; cursor:pointer; margin-right:10px;">Editar</button>
+                        <button onclick="deleteProd('${p.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer;">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editProd(id) {
+            const p = products.find(prod => prod.id == id);
+            document.getElementById('editId').value = p.id;
+            document.getElementById('pTitle').value = p.title;
+            document.getElementById('pCat').value = p.category;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('admTitle').innerText = "Editar Produto";
+            document.getElementById('saveBtn').innerText = "Atualizar";
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('editId').value = "";
+            document.getElementById('pTitle').value = "";
+            document.getElementById('admTitle').innerText = "Novo Produto";
+            document.getElementById('saveBtn').innerText = "Salvar Produto";
+        }
+
+        document.getElementById('saveBtn').onclick = async function() {
+            const id = document.getElementById('editId').value;
+            const title = document.getElementById('pTitle').value;
+            const category = document.getElementById('pCat').value;
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const file = document.getElementById('pImage').files[0];
+
+            this.disabled = true;
+            this.innerText = "Aguarde...";
+
+            try {
+                let image_url = products.find(p => p.id == id)?.image_url || "";
+                if(file) {
+                    const path = `public/${Date.now()}_${file.name}`;
+                    await _supabase.storage.from('imagens-produtos').upload(path, file);
+                    image_url = _supabase.storage.from('imagens-produtos').getPublicUrl(path).data.publicUrl;
+                }
+
+                const obj = { title, category, price, image_url };
+                const { error } = id ? await _supabase.from('produtos').update(obj).eq('id', id) : await _supabase.from('produtos').insert([obj]);
+                
+                if(error) throw error;
+                closeAdmin();
+            } catch(e) { alert(e.message); }
+            finally { this.disabled = false; }
+        };
+
+        async function deleteProd(id) {
+            if(confirm("Apagar produto?")) {
+                await _supabase.from('produtos').delete().eq('id', id);
+                renderAdminList();
+            }
+        }
+
         document.getElementById('searchInput').oninput = (e) => { query = e.target.value; renderGrid(); };
 
         init();
