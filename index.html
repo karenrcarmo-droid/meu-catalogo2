@@ -13,12 +13,8 @@
             --danger: #ef4444; --glass: blur(12px);
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
         .container { width: min(1200px, 94vw); margin: auto; }
         
         /* HEADER */
@@ -28,35 +24,35 @@
         .logo span { color: var(--accent); }
 
         /* CATEGORIAS */
-        .cat-nav { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; margin-bottom: 20px; scrollbar-width: none; }
-        .cat-nav::-webkit-scrollbar { display: none; }
+        .cat-nav { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; margin-bottom: 20px; }
         .cat-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: bold; }
+        .cat-btn.active { background: var(--accent); color: #000; font-weight: bold; }
 
-        /* BOTÕES */
+        /* GRID E CARDS */
+        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        .card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.4s; }
+        .card:hover { transform: translateY(-8px); border-color: var(--accent); }
+        
+        .img-container { width: 100%; height: 260px; overflow: hidden; position: relative; }
+        .productImage { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; cursor: pointer; }
+        
+        /* SISTEMA DE LIKES */
+        .like-container { position: absolute; top: 15px; right: 15px; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 10; }
+        .btn-like { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; transition: 0.3s; padding: 0; }
+        .btn-like.active { color: var(--danger); animation: pulse 0.4s ease; }
+        .like-count { font-size: 11px; font-weight: bold; color: #fff; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
         .btn { border: none; cursor: pointer; border-radius: 12px; padding: 10px 18px; font-weight: 700; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; color: white; text-decoration: none; }
         .btn-primary { background: var(--accent); color: #000; }
         .btn-dark { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
-        
-        /* GRID */
-        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; backdrop-filter: var(--glass); transition: 0.4s; }
-        .card:hover { transform: translateY(-8px); border-color: var(--accent); }
-        .img-container { width: 100%; height: 260px; overflow: hidden; }
-        .productImage { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; cursor: pointer; }
-        .card:hover .productImage { transform: scale(1.1); }
-        .card__body { padding: 20px; }
 
-        /* SIDEBARS & MODAIS */
-        .cartSidebar { position: fixed; top: 0; right: -450px; width: 420px; max-width: 100%; height: 100vh; background: rgba(11, 15, 23, 0.98); z-index: 2000; transition: 0.4s; border-left: 1px solid var(--border); backdrop-filter: blur(20px); display: flex; flex-direction: column; }
-        .cartSidebar.active { right: 0; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px; backdrop-filter: blur(10px); }
-        .modal.active { display: flex; }
-        .modal__content { background: #111827; padding: 30px; border-radius: 28px; width: min(500px, 100%); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
-
-        input { background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; }
-
-        footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 50px; opacity: 0.7; }
+        footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 50px; }
     </style>
 </head>
 <body>
@@ -65,64 +61,30 @@
         <div class="container topbar__inner">
             <a href="#" class="logo">Kn2 <span>Personalizados</span></a>
             <div style="display: flex; gap: 10px;">
-                <a href="https://www.instagram.com/arteskn2?igsh=bmpsYW9kdHgzdzlp" target="_blank" class="btn btn-dark" style="padding: 10px;">📸</a>
                 <button class="btn btn-dark" onclick="toggleCart()">🛒 <span id="cartCount">0</span></button>
-                <button class="btn btn-primary" id="adminBtn">Gerenciar</button>
+                <button class="btn btn-primary" id="adminBtn">Painel</button>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <div style="margin-top: 20px;">
-            <input type="text" id="searchInput" placeholder="Buscar produto...">
-        </div>
-
+        <div style="margin-top: 20px;"><input type="text" id="searchInput" placeholder="Buscar produto..."></div>
         <div class="cat-nav" id="categoryNav"></div>
-
         <div id="catalogContainer"></div>
     </main>
 
-    <div class="cartSidebar" id="cartSidebar">
-        <div style="padding: 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-            <h3>Meu Carrinho</h3>
-            <button onclick="toggleCart()" class="btn btn-dark">✕</button>
-        </div>
-        <div id="cartItems" style="flex:1; overflow-y:auto; padding: 20px;"></div>
-        <div style="padding: 25px; border-top: 1px solid var(--border);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                <span>Total:</span>
-                <span id="cartTotal" style="color:var(--accent); font-weight:900; font-size:1.4rem;">R$ 0,00</span>
-            </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="sendWhatsApp()">Finalizar Pedido</button>
-        </div>
-    </div>
-
-    <div class="modal" id="adminModal">
-        <div class="modal__content">
-            <h3 id="adminModalTitle">Adicionar Produto</h3>
-            <div style="margin-top: 15px;">
-                <input type="hidden" id="editId">
-                <input type="text" id="pTitle" placeholder="Nome">
-                <input type="text" id="pCat" placeholder="Categoria">
-                <input type="number" id="pPrice" placeholder="Preço">
-                <input type="file" id="pImage">
-                <button class="btn btn-primary" id="saveBtn" style="width: 100%;">Salvar Produto</button>
-                <button class="btn btn-dark" onclick="closeAdmin()" style="width: 100%; margin-top: 10px;">Cancelar</button>
-            </div>
-            <div id="adminList" style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;"></div>
-        </div>
-    </div>
-
-    <div class="modal" id="zoomModal" onclick="this.classList.remove('active')">
+    <div class="modal" id="zoomModal" onclick="this.classList.remove('active')" style="display: none; position: fixed; inset:0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center;">
         <img id="zoomImg" src="" style="max-width: 90%; max-height: 80vh; border-radius: 20px;">
     </div>
 
     <footer>
         <p>Kn2 Personalizados © 2024</p>
         <div style="margin: 15px 0;">
-            <a href="https://www.instagram.com/arteskn2?igsh=bmpsYW9kdHgzdzlp" target="_blank" style="color: var(--accent); text-decoration: none;">Siga-nos no Instagram</a>
+            <a href="https://www.instagram.com/arteskn2" target="_blank" style="color: var(--accent); text-decoration: none;">Instagram 📸</a>
         </div>
-        <p style="font-size: 12px; color: var(--muted);">Visitantes: <span id="visitorCount">0</span></p>
+        <p style="font-size: 13px; background: rgba(255,255,255,0.05); display: inline-block; padding: 5px 15px; border-radius: 20px;">
+            👁️ <span id="visitorCount">Carregando...</span> visitas reais
+        </p>
     </footer>
 
     <script>
@@ -136,20 +98,24 @@
         let currentCat = "Todos";
 
         async function init() {
-            updateVisitorCount();
+            handleVisits();
             await loadProducts();
             setupRealtime();
             renderCategories();
             renderGrid();
-            updateCartUI();
         }
 
-        // CONTADOR DE VISITANTES (Simulado)
-        function updateVisitorCount() {
-            let count = localStorage.getItem("visitas") || 1420;
-            count = parseInt(count) + 1;
-            localStorage.setItem("visitas", count);
-            document.getElementById('visitorCount').innerText = count.toLocaleString();
+        // --- CONTADOR DE VISITAS REAL (via Banco) ---
+        async function handleVisits() {
+            // Incrementa no banco
+            await _supabase.rpc('increment_visits'); 
+            // Se não quiser usar RPC, pode usar um update simples:
+            const { data } = await _supabase.from('estatisticas').select('visitas').eq('id', 1).single();
+            if(data) {
+                const novoTotal = data.visitas + 1;
+                await _supabase.from('estatisticas').update({ visitas: novoTotal }).eq('id', 1);
+                document.getElementById('visitorCount').innerText = novoTotal.toLocaleString();
+            }
         }
 
         async function loadProducts() {
@@ -158,23 +124,24 @@
         }
 
         function setupRealtime() {
-            _supabase.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
-                loadProducts().then(() => { renderCategories(); renderGrid(); });
+            _supabase.channel('db-all').on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
+                loadProducts().then(() => renderGrid());
             }).subscribe();
         }
 
-        function renderCategories() {
-            const nav = document.getElementById('categoryNav');
-            const cats = ["Todos", ...new Set(products.map(p => p.category))];
-            nav.innerHTML = cats.map(c => `
-                <button class="cat-btn ${currentCat === c ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>
-            `).join('');
-        }
-
-        function filterCat(c) {
-            currentCat = c;
-            renderCategories();
-            renderGrid();
+        // --- SISTEMA DE LIKES REAL ---
+        async function toggleLike(id, event) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            const isLiked = btn.classList.contains('active');
+            
+            // Lógica otimista (muda na tela antes do banco)
+            const product = products.find(p => p.id == id);
+            if(!isLiked) {
+                product.likes = (product.likes || 0) + 1;
+                btn.classList.add('active');
+                await _supabase.from('produtos').update({ likes: product.likes }).eq('id', id);
+            }
         }
 
         function renderGrid() {
@@ -189,19 +156,25 @@
             const catsInGrid = [...new Set(filtered.map(p => p.category))];
             catsInGrid.forEach(cat => {
                 const section = document.createElement('div');
-                section.innerHTML = `<h2 style="margin: 40px 0 20px; font-size: 18px; color: var(--accent)">${cat}</h2>`;
+                section.innerHTML = `<h2 style="margin: 40px 0 20px; font-size: 14px; text-transform: uppercase; color: var(--accent); letter-spacing: 1px;">${cat}</h2>`;
                 const grid = document.createElement('div');
                 grid.className = 'productsGrid';
                 
                 filtered.filter(p => p.category === cat).forEach(p => {
                     grid.innerHTML += `
                         <div class="card">
-                            <div class="img-container"><img src="${p.image_url}" class="productImage" onclick="openZoom('${p.image_url}')"></div>
+                            <div class="like-container">
+                                <button class="btn-like" onclick="toggleLike('${p.id}', event)">❤</button>
+                                <span class="like-count">${p.likes || 0}</span>
+                            </div>
+                            <div class="img-container">
+                                <img src="${p.image_url}" class="productImage" onclick="openZoom('${p.image_url}')">
+                            </div>
                             <div class="card__body">
-                                <h4 style="margin-bottom:10px">${p.title}</h4>
+                                <h4 style="margin-bottom:12px; font-size:15px;">${p.title}</h4>
                                 <div style="display:flex; justify-content:space-between; align-items:center">
-                                    <span style="font-weight:900; color:var(--accent)">R$ ${p.price.toFixed(2)}</span>
-                                    <button class="btn btn-primary" onclick="addToCart('${p.id}')">Add</button>
+                                    <span style="font-weight:900; color:var(--accent); font-size:18px;">R$ ${p.price.toFixed(2)}</span>
+                                    <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="padding: 8px 12px; font-size:13px;">Add</button>
                                 </div>
                             </div>
                         </div>`;
@@ -211,117 +184,22 @@
             });
         }
 
-        // --- FUNÇÕES DE ADMIN COM EDIÇÃO ---
-        function openEdit(id) {
-            const p = products.find(prod => prod.id == id);
-            document.getElementById('editId').value = p.id;
-            document.getElementById('pTitle').value = p.title;
-            document.getElementById('pCat').value = p.category;
-            document.getElementById('pPrice').value = p.price;
-            document.getElementById('adminModalTitle').innerText = "Editar Produto";
-            document.getElementById('saveBtn').innerText = "Atualizar Produto";
-        }
-
-        function closeAdmin() {
-            document.getElementById('adminModal').classList.remove('active');
-            document.getElementById('editId').value = "";
-            document.getElementById('pTitle').value = "";
-            document.getElementById('adminModalTitle').innerText = "Adicionar Produto";
-            document.getElementById('saveBtn').innerText = "Salvar Produto";
-        }
-
-        document.getElementById('saveBtn').onclick = async function() {
-            const id = document.getElementById('editId').value;
-            const title = document.getElementById('pTitle').value;
-            const category = document.getElementById('pCat').value;
-            const price = parseFloat(document.getElementById('pPrice').value);
-            const file = document.getElementById('pImage').files[0];
-
-            this.disabled = true;
-            this.innerText = "Processando...";
-
-            try {
-                let image_url = products.find(p => p.id == id)?.image_url || "";
-                
-                if (file) {
-                    const path = `produtos/${Date.now()}_${file.name}`;
-                    await _supabase.storage.from('imagens-produtos').upload(path, file);
-                    const { data } = _supabase.storage.from('imagens-produtos').getPublicUrl(path);
-                    image_url = data.publicUrl;
-                }
-
-                const payload = { title, category, price, image_url };
-                const { error } = id 
-                    ? await _supabase.from('produtos').update(payload).eq('id', id)
-                    : await _supabase.from('produtos').insert([payload]);
-
-                if (error) throw error;
-                closeAdmin();
-                loadProducts().then(() => renderGrid());
-            } catch (e) { alert(e.message); }
-            finally { this.disabled = false; }
-        };
-
-        // --- RESTANTE DAS FUNÇÕES ---
-        function addToCart(id) {
-            const p = products.find(prod => prod.id == id);
-            const inCart = cart.find(item => item.id == id);
-            if (inCart) inCart.qty++; else cart.push({...p, qty: 1});
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            localStorage.setItem("cart", JSON.stringify(cart));
-            const container = document.getElementById('cartItems');
-            let total = 0;
-            container.innerHTML = cart.map(item => {
-                total += item.price * item.qty;
-                return `<div style="display:flex; gap:10px; margin-bottom:10px"><img src="${item.image_url}" width="50" height="50" style="border-radius:8px"> <div>${item.title}<br><b>${item.qty}x R$ ${item.price}</b></div></div>`;
-            }).join('');
-            document.getElementById('cartTotal').innerText = `R$ ${total.toFixed(2)}`;
-            document.getElementById('cartCount').innerText = cart.reduce((a, b) => a + b.qty, 0);
-        }
-
-        function toggleCart() { document.getElementById('cartSidebar').classList.toggle('active'); }
-        function openZoom(url) { document.getElementById('zoomImg').src = url; document.getElementById('zoomModal').classList.add('active'); }
-
-        document.getElementById('adminBtn').onclick = async () => {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (user) {
-                document.getElementById('adminModal').classList.add('active');
-                renderAdminList();
-            } else {
-                const email = prompt("E-mail:");
-                const password = prompt("Senha:");
-                await _supabase.auth.signInWithPassword({ email, password });
-                location.reload();
-            }
-        };
-
-        function renderAdminList() {
-            const container = document.getElementById('adminList');
-            container.innerHTML = products.map(p => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;">
-                    <span>${p.title}</span>
-                    <div>
-                        <button onclick="openEdit('${p.id}')" style="color:var(--accent); background:none; border:none; cursor:pointer; margin-right:10px">Editar</button>
-                        <button onclick="deleteProduct('${p.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer">Excluir</button>
-                    </div>
-                </div>
+        function renderCategories() {
+            const nav = document.getElementById('categoryNav');
+            const cats = ["Todos", ...new Set(products.map(p => p.category))];
+            nav.innerHTML = cats.map(c => `
+                <button class="cat-btn ${currentCat === c ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>
             `).join('');
         }
 
-        async function deleteProduct(id) {
-            if(confirm("Excluir?")) { await _supabase.from('produtos').delete().eq('id', id); renderAdminList(); }
+        function filterCat(c) { currentCat = c; renderCategories(); renderGrid(); }
+        function openZoom(url) { 
+            const m = document.getElementById('zoomModal');
+            document.getElementById('zoomImg').src = url;
+            m.style.display = 'flex';
         }
-
+        
         document.getElementById('searchInput').oninput = (e) => { query = e.target.value; renderGrid(); };
-
-        function sendWhatsApp() {
-            let msg = "Pedido Kn2:%0A";
-            cart.forEach(i => msg += `• ${i.title} (x${i.qty})%0A`);
-            window.open(`https://wa.me/5531999683959?text=${msg}`);
-        }
 
         init();
     </script>
