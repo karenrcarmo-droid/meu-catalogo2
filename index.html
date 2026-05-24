@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kn2 Personalizados | Admin Pro</title>
+    <title>Kn2 Personalizados | Catálogo Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -18,47 +18,60 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); overflow-x:hidden; }
         .container { width:min(1200px, 92vw); margin:auto; }
+        
+        /* HEADER */
         .header { position:sticky; top:0; z-index:1000; background:rgba(11,15,23,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
         .header-inner { padding:15px 0; display:flex; justify-content:space-between; align-items:center; }
-        .logo { font-size:22px; font-weight:800; background:linear-gradient(to right, #22c55e, #10b981); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-decoration:none; }
-        .btn { border:none; cursor:pointer; border-radius:10px; padding:10px 18px; color:white; font-weight:600; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
-        .btn:hover { transform:translateY(-2px); opacity:.92; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .logo { font-size:24px; font-weight:800; background:linear-gradient(to right, #22c55e, #10b981); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-decoration:none; }
+        
+        /* BUTTONS */
+        .btn { border:none; cursor:pointer; border-radius:12px; padding:12px 20px; color:white; font-weight:600; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
+        .btn:hover { transform:translateY(-2px); opacity:.9; }
         .btn-primary { background: var(--accent); }
         .btn-dark { background:#1f2937; }
         .btn-danger { background: var(--danger); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* SEARCH & FILTERS */
         .search-box { margin:30px 0; }
-        .search-input { width:100%; padding:16px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:white; outline:none; }
+        .search-input { width:100%; padding:16px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:white; outline:none; margin-bottom:15px; }
         .filter-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
-        .filter-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:8px 18px; border-radius:20px; cursor:pointer; }
+        .filter-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:8px 18px; border-radius:20px; cursor:pointer; transition: .2s; }
         .filter-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+
+        /* CATALOG GRID */
         .cat-section { margin-bottom:50px; }
-        .cat-header { font-size:18px; margin-bottom:20px; display:flex; align-items:center; gap:15px; color:var(--text); }
+        .cat-header { font-size:20px; margin-bottom:20px; display:flex; align-items:center; gap:15px; }
         .cat-header::after { content:''; flex:1; height:1px; background:var(--border); }
         .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:25px; }
+        
+        /* CARD */
         .card { background:var(--card); border-radius:20px; border:1px solid var(--border); overflow:hidden; transition:.3s; display:flex; flex-direction:column; }
-        .card:hover { transform:translateY(-4px); }
+        .card:hover { transform:translateY(-5px); border-color: var(--accent); }
         .card-img { width:100%; height:280px; object-fit:cover; cursor:zoom-in; }
         .card-info { padding:20px; flex:1; display:flex; flex-direction:column; }
         .card-price { color:var(--accent); font-size:22px; font-weight:800; margin:10px 0 15px; }
+
+        /* CART SIDEBAR */
         .cart-side { position:fixed; top:0; right:-420px; width:400px; max-width:100%; height:100vh; background:var(--card); z-index:2000; transition:.4s; border-left:1px solid var(--border); display:flex; flex-direction:column; }
         .cart-side.active { right:0; }
-        .cart-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
+        .cart-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
         .cart-items { flex:1; overflow-y:auto; padding:20px; }
         .cart-footer { padding:25px; background:#0b0f17; border-top:1px solid var(--border); }
-        .modal { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+        .cart-item { display:flex; gap:12px; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px; border-radius:12px; }
+
+        /* MODALS */
+        .modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
         .modal.active { display:flex; }
         .modal-body { background:var(--card); padding:30px; border-radius:25px; width:100%; max-width:550px; max-height:90vh; overflow-y:auto; border:1px solid var(--border); }
         .f-group { margin-bottom:15px; }
-        .f-group label { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
-        .f-group input, .f-group select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:#0b0f17; color:white; outline: none; }
-        .adm-cat-group { margin-bottom:20px; padding:10px; background:rgba(255,255,255,0.02); border-radius:15px; }
-        .adm-cat-label { font-size:12px; font-weight:800; color:var(--accent); text-transform:uppercase; margin-bottom:10px; display:block; letter-spacing:1px; }
-        .adm-item { display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid rgba(255,255,255,0.05); }
-        .adm-item img { width:40px; height:40px; border-radius:6px; object-fit:cover; }
-        .zoom-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:5000; }
-        .zoom-overlay.active { display:flex; }
-        .footer { background:#080b11; border-top:1px solid var(--border); padding:60px 0 30px; margin-top:100px; }
+        .f-group label { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; text-transform: uppercase; letter-spacing: 1px; }
+        .f-group input, .f-group select { width:100%; padding:13px; border-radius:10px; border:1px solid var(--border); background:#0b0f17; color:white; outline: none; }
+        
+        /* ADMIN LIST */
+        .adm-item { display:flex; align-items:center; gap:12px; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .adm-item img { width:50px; height:50px; border-radius:8px; object-fit:cover; }
+
         @media(max-width:768px){ .grid { grid-template-columns:1fr; } .cart-side { width:100%; } }
     </style>
 </head>
@@ -77,59 +90,74 @@
 
 <main class="container">
     <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="O que você está procurando?">
         <div class="filter-row" id="filterRow"></div>
-        <input type="text" class="search-input" id="searchInput" placeholder="Buscar no catálogo...">
     </div>
     <div id="catalog"></div>
 </main>
 
 <div class="cart-side" id="cartSide">
-    <div class="cart-header"><h3>Meu Carrinho</h3><button class="btn" onclick="toggleCart()">✕</button></div>
+    <div class="cart-header">
+        <h3>Meu Carrinho</h3>
+        <button class="btn" onclick="toggleCart()">✕</button>
+    </div>
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-footer">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px">
-            <span>Total:</span><strong id="cartTotal" style="color:var(--accent); font-size:22px">R$ 0,00</strong>
+            <span>Total:</span>
+            <strong id="cartTotal" style="color:var(--accent); font-size:24px">R$ 0,00</strong>
         </div>
-        <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="sendToWhatsApp()">Finalizar Pedido</button>
+        <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="sendToWhatsApp()">Finalizar no WhatsApp</button>
     </div>
 </div>
 
 <div class="modal" id="adminModal">
     <div class="modal-body">
-        <h2 id="modalTitle" style="margin-bottom:20px">Gerenciar</h2>
+        <h2 id="modalTitle" style="margin-bottom:20px">Gerenciar Catálogo</h2>
         <input type="hidden" id="editId">
-        <div class="f-group"><label>Produto</label><input type="text" id="pTitle"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
-            <div class="f-group"><label>Categoria</label>
-                <div style="display:flex; gap:5px"><select id="pCat"></select><button class="btn btn-dark" onclick="newCat()">+</button></div>
-            </div>
-            <div class="f-group"><label>Preço</label><input type="text" id="pPrice" placeholder="R$ 0,00"></div>
-        </div>
+        
         <div class="f-group">
-            <label>Imagem (Upload local)</label>
+            <label>Nome do Produto</label>
+            <input type="text" id="pTitle">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+            <div class="f-group">
+                <label>Categoria</label>
+                <div style="display:flex; gap:5px">
+                    <select id="pCat"></select>
+                    <button class="btn btn-dark" onclick="newCat()" style="padding:10px">+</button>
+                </div>
+            </div>
+            <div class="f-group">
+                <label>Preço</label>
+                <input type="text" id="pPrice" placeholder="R$ 0,00">
+            </div>
+        </div>
+
+        <div class="f-group">
+            <label>Foto do Produto (Upload)</label>
             <input type="file" id="pImageFile" accept="image/*">
             <input type="hidden" id="pImg">
         </div>
+
         <div style="display:flex; gap:10px">
-            <button class="btn btn-primary" style="flex:1" id="saveBtn">Salvar</button>
+            <button class="btn btn-primary" style="flex:1" id="saveBtn">Salvar Produto</button>
             <button class="btn btn-dark" onclick="closeAdmin()">Cancelar</button>
         </div>
-        <div id="adminListAgrupada" style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px"></div>
+
+        <div id="adminList" style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px"></div>
     </div>
 </div>
 
 <div class="modal" id="loginModal">
     <div class="modal-body" style="max-width:350px">
-        <h2>Admin Login</h2><br>
+        <h2>Acesso Restrito</h2><br>
         <div class="f-group"><label>E-mail</label><input type="email" id="lEmail"></div>
         <div class="f-group"><label>Senha</label><input type="password" id="lPass"></div>
         <button class="btn btn-primary" style="width:100%" id="loginBtn">Entrar</button>
     </div>
 </div>
-
-<div class="zoom-overlay" id="zoomModal" onclick="this.classList.remove('active')"><img src="" id="zoomImg" style="max-width:90%; max-height:90%; border-radius:10px"></div>
-
-<footer class="footer"><div class="container" style="text-align:center; color:var(--muted); font-size:12px">&copy; <span id="year"></span> Kn2 Personalizados.</div></footer>
 
 <script>
 const SB_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
@@ -142,19 +170,15 @@ let activeCat = "Todos";
 let query = "";
 let categories = [];
 
-// Melhoria 5: Máscara
-function setupPriceMask() {
-    const input = document.getElementById('pPrice');
-    input.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, "");
-        value = (value / 100).toFixed(2) + "";
-        value = value.replace(".", ",");
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-        e.target.value = value ? "R$ " + value : "";
-    });
-}
+// Máscara de Moeda R$
+document.getElementById('pPrice').addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = (v / 100).toFixed(2).replace(".", ",");
+    v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    e.target.value = v ? "R$ " + v : "";
+});
 
-// Melhoria 4: Otimização
+// Otimização de Imagem antes do Upload
 async function compressImage(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -178,26 +202,25 @@ async function compressImage(file) {
 
 async function init() {
     await loadData();
-    await checkSession();
+    checkSession();
     updateCartUI();
-    setupPriceMask();
-    document.getElementById('year').textContent = new Date().getFullYear();
 }
 
 async function loadData() {
     const { data, error } = await _supabase.from('produtos').select('*').order('category', { ascending:true });
-    if(error) return;
+    if(error) return console.error(error);
     products = data || [];
     categories = [...new Set(products.map(p => p.category).filter(Boolean))];
     updateCatSelect();
     render();
 }
 
-function render(){
-    const filterContainer = document.getElementById('filterRow');
+function render() {
     const cats = ["Todos", ...categories];
-    filterContainer.innerHTML = cats.map(c => `<button class="filter-btn ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>`).join('');
-    
+    document.getElementById('filterRow').innerHTML = cats.map(c => `
+        <button class="filter-btn ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>
+    `).join('');
+
     let filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()));
     if(activeCat !== "Todos") filtered = filtered.filter(p => p.category === activeCat);
 
@@ -215,7 +238,7 @@ function render(){
                     <div class="card">
                         <img src="${p.image_url}" class="card-img" onclick="zoom('${p.image_url}')">
                         <div class="card-info">
-                            <div style="font-weight:600">${p.title}</div>
+                            <strong style="font-size:18px">${p.title}</strong>
                             <div class="card-price">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</div>
                             <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="justify-content:center">🛒 Adicionar</button>
                         </div>
@@ -226,73 +249,94 @@ function render(){
     `).join('');
 }
 
-function setCat(c){ activeCat = c; render(); }
-function zoom(url){ document.getElementById('zoomImg').src = url; document.getElementById('zoomModal').classList.add('active'); }
-function toggleCart(){ document.getElementById('cartSide').classList.toggle('active'); }
+function setCat(c) { activeCat = c; render(); }
+function toggleCart() { document.getElementById('cartSide').classList.toggle('active'); }
 
-function addToCart(id){
+function addToCart(id) {
     const p = products.find(x => x.id == id);
     const exists = cart.find(x => x.id == id);
     if(exists) exists.qty++; else cart.push({ ...p, qty:1 });
     updateCartUI();
+    toggleCart();
 }
 
-function updateCartUI(){
+function updateCartUI() {
     localStorage.setItem('kn2_cart', JSON.stringify(cart));
     document.getElementById('cartCount').textContent = cart.reduce((a,b) => a + b.qty, 0);
     let total = 0;
     document.getElementById('cartItems').innerHTML = cart.map(i => {
         total += i.price * i.qty;
-        return `<div style="display:flex; gap:10px; margin-bottom:10px">
-            <img src="${i.image_url}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
-            <div style="flex:1; font-size:12px"><strong>${i.title}</strong><br>${i.qty}x R$ ${Number(i.price).toFixed(2)}</div>
-            <button onclick="remCart('${i.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer">✕</button>
+        return `<div class="cart-item">
+            <img src="${i.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:8px">
+            <div style="flex:1"><strong>${i.title}</strong><br><small>${i.qty}x R$ ${Number(i.price).toFixed(2)}</small></div>
+            <button onclick="remCart('${i.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer">✕</button>
         </div>`;
     }).join('');
     document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
 }
 
-function remCart(id){ cart = cart.filter(x => x.id != id); updateCartUI(); }
+function remCart(id) { cart = cart.filter(x => x.id != id); updateCartUI(); }
 
-function sendToWhatsApp(){
-    let msg = "Olá Kn2! Pedido:\n" + cart.map(i => `• ${i.title} (${i.qty}x)`).join('\n');
+function sendToWhatsApp() {
+    if(!cart.length) return alert("Carrinho vazio!");
+    let msg = "Olá Kn2! Gostaria de encomendar:\n\n" + cart.map(i => `• ${i.title} (${i.qty}x)`).join('\n');
+    msg += `\n\nTotal: ${document.getElementById('cartTotal').textContent}`;
     window.open(`https://wa.me/5531999683959?text=${encodeURIComponent(msg)}`);
 }
 
-async function checkSession(){
-    const { data:{ user } } = await _supabase.auth.getUser();
-    if(user) document.getElementById('logoutBtn').style.display = 'block';
-    return !!user;
-}
-
+// ADMIN & LOGIN LÓGICA
 document.getElementById('adminBtn').onclick = async () => {
-    if(await checkSession()){ document.getElementById('adminModal').classList.add('active'); renderAdmList(); }
+    const { data:{ user } } = await _supabase.auth.getUser();
+    if(user) { document.getElementById('adminModal').classList.add('active'); renderAdmList(); }
     else document.getElementById('loginModal').classList.add('active');
 };
 
 document.getElementById('loginBtn').onclick = async () => {
-    const { error } = await _supabase.auth.signInWithPassword({ email: document.getElementById('lEmail').value, password: document.getElementById('lPass').value });
-    if(error) alert('Erro'); else location.reload();
+    const { error } = await _supabase.auth.signInWithPassword({ 
+        email: document.getElementById('lEmail').value, 
+        password: document.getElementById('lPass').value 
+    });
+    if(error) alert('Falha no login'); else location.reload();
 };
 
-document.getElementById('logoutBtn').onclick = async () => { await _supabase.auth.signOut(); location.reload(); };
+document.getElementById('saveBtn').onclick = async () => {
+    const btn = document.getElementById('saveBtn');
+    const fileInput = document.getElementById('pImageFile');
+    let imageUrl = document.getElementById('pImg').value;
+    
+    btn.disabled = true; btn.textContent = "Processando...";
 
-function updateCatSelect(){
-    document.getElementById('pCat').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
-}
+    try {
+        if (fileInput.files[0]) {
+            const blob = await compressImage(fileInput.files[0]);
+            const fileName = Date.now() + ".jpg";
+            
+            const { error: upErr } = await _supabase.storage.from('imagens').upload(fileName, blob);
+            if (upErr) throw upErr;
 
-function newCat(){
-    const n = prompt('Nova Categoria:');
-    if(n) { categories.push(n); updateCatSelect(); document.getElementById('pCat').value = n; }
-}
+            const { data: { publicUrl } } = _supabase.storage.from('imagens').getPublicUrl(fileName);
+            imageUrl = publicUrl;
+        }
 
-function renderAdmList(){
-    document.getElementById('adminListAgrupada').innerHTML = products.map(p => `
+        const price = parseFloat(document.getElementById('pPrice').value.replace("R$ ","").replace(".","").replace(",","."));
+        const payload = { title: document.getElementById('pTitle').value, category: document.getElementById('pCat').value, price, image_url: imageUrl };
+        
+        const id = document.getElementById('editId').value;
+        const { error } = id ? await _supabase.from('produtos').update(payload).eq('id', id) : await _supabase.from('produtos').insert([payload]);
+        
+        if(error) throw error;
+        location.reload();
+    } catch (err) { alert("Erro: " + err.message); } 
+    finally { btn.disabled = false; btn.textContent = "Salvar Produto"; }
+};
+
+function renderAdmList() {
+    document.getElementById('adminList').innerHTML = products.map(p => `
         <div class="adm-item">
             <img src="${p.image_url}">
-            <span style="flex:1; font-size:13px">${p.title}</span>
-            <button class="btn btn-primary" onclick="edit('${p.id}')">✏️</button>
-            <button class="btn btn-danger" onclick="del('${p.id}')">🗑️</button>
+            <span style="flex:1">${p.title}</span>
+            <button class="btn btn-primary" onclick="edit('${p.id}')" style="padding:5px">✏️</button>
+            <button class="btn btn-danger" onclick="del('${p.id}')" style="padding:5px">🗑️</button>
         </div>
     `).join('');
 }
@@ -304,54 +348,15 @@ window.edit = (id) => {
     document.getElementById('pCat').value = p.category;
     document.getElementById('pPrice').value = "R$ " + Number(p.price).toFixed(2).replace('.', ',');
     document.getElementById('pImg').value = p.image_url;
+    document.getElementById('modalTitle').textContent = "Editando Produto";
 };
 
-document.getElementById('saveBtn').onclick = async () => {
-    const btn = document.getElementById('saveBtn');
-    const fileInput = document.getElementById('pImageFile');
-    let imageUrl = document.getElementById('pImg').value;
-    
-    btn.disabled = true;
-    btn.textContent = "Processando...";
-
-    try {
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const optimized = await compressImage(file);
-            const fileName = `${Date.now()}_prod.jpg`;
-            
-            // CORREÇÃO CRITICAL: Enviar para 'imagens' sem pastas extras
-            const { data, error: uploadError } = await _supabase.storage
-                .from('imagens')
-                .upload(fileName, optimized);
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = _supabase.storage.from('imagens').getPublicUrl(fileName);
-            imageUrl = publicUrl;
-        }
-
-        const rawPrice = document.getElementById('pPrice').value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
-        const payload = { title: document.getElementById('pTitle').value, category: document.getElementById('pCat').value, price: parseFloat(rawPrice), image_url: imageUrl };
-        
-        const id = document.getElementById('editId').value;
-        const { error } = id ? await _supabase.from('produtos').update(payload).eq('id', id) : await _supabase.from('produtos').insert([payload]);
-        
-        if(error) throw error;
-        location.reload();
-    } catch (err) {
-        alert("Erro na operação: " + err.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "Salvar";
-    }
-};
-
-window.del = async (id) => {
-    if(confirm('Excluir?')) { await _supabase.from('produtos').delete().eq('id', id); location.reload(); }
-};
-
-function closeAdmin(){ document.getElementById('adminModal').classList.remove('active'); }
+window.del = async (id) => { if(confirm('Excluir?')) { await _supabase.from('produtos').delete().eq('id', id); location.reload(); } };
+function closeAdmin() { document.getElementById('adminModal').classList.remove('active'); }
+function newCat() { const n = prompt('Nova Categoria:'); if(n) { categories.push(n); updateCatSelect(); document.getElementById('pCat').value = n; } }
+function updateCatSelect() { document.getElementById('pCat').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join(''); }
+function checkSession() { _supabase.auth.getUser().then(({data}) => { if(data.user) document.getElementById('logoutBtn').style.display = 'block'; }); }
+document.getElementById('logoutBtn').onclick = () => { _supabase.auth.signOut().then(() => location.reload()); };
 document.getElementById('searchInput').oninput = (e) => { query = e.target.value; render(); };
 
 init();
