@@ -800,7 +800,7 @@ document.getElementById('saveBtn').onclick = async () => {
             const fileName = `${Date.now()}_prod.jpg`; 
             
             const { data, error: uploadError } = await _supabase.storage
-                .from('imagens') 
+                .from('image_url') 
                 .upload(fileName, optimizedBlob);
 
             if (uploadError) throw uploadError;
