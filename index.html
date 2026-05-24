@@ -1,1767 +1,360 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Kn2 Catálogo</title>
-
-  <meta name="theme-color" content="#0b0f17">
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root {
-      --bg: #0b0f17;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: rgba(255,255,255,.08);
-      --accent: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-    }
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
-
-    body{
-      background:var(--bg);
-      color:var(--text);
-      font-family:system-ui;
-    }
-
-    .container{
-      width:min(1200px,92vw);
-      margin:auto;
-    }
-
-    /* TOPBAR */
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:1000;
-      backdrop-filter:blur(10px);
-      background:rgba(11,15,23,.9);
-      border-bottom:1px solid var(--border);
-    }
-
-    .topbar__inner{
-      padding:16px 0;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .logo{
-      font-size:30px;
-      font-weight:900;
-    }
-
-    .topbar__actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    .btn{
-      border:none;
-      cursor:pointer;
-      border-radius:12px;
-      padding:12px 16px;
-      color:white;
-      font-weight:700;
-      transition:.2s;
-    }
-
-    .btn:hover{
-      transform:translateY(-2px);
-    }
-
-    .btn-primary{
-      background:var(--accent);
-    }
-
-    .btn-dark{
-      background:#1f2937;
-    }
-
-    .btn-danger{
-      background:var(--danger);
-    }
-
-    /* MENU */
-
-    .menu{
-      margin-top:20px;
-    }
-
-    .menu__row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .menu__btn{
-      background:transparent;
-      border:1px solid var(--border);
-      color:white;
-      padding:10px 16px;
-      border-radius:999px;
-      cursor:pointer;
-    }
-
-    .menu__btn.active{
-      background:rgba(34,197,94,.12);
-      border-color:var(--accent);
-      color:var(--accent);
-    }
-
-    /* SEARCH */
-
-    .search{
-      margin:20px 0;
-    }
-
-    .search input{
-      width:100%;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:#111827;
-      color:white;
-      outline:none;
-    }
-
-    /* GRID */
-
-    .categoryBlock{
-      margin-bottom:50px;
-    }
-
-    .categoryHeading{
-      margin-bottom:18px;
-      border-bottom:1px solid var(--border);
-      padding-bottom:10px;
-    }
-
-    .productsGrid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-      gap:16px;
-    }
-
-    .card{
-      background:var(--card);
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid var(--border);
-      transition:.25s;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .card:hover{
-      transform:translateY(-4px);
-    }
-
-    .productImage{
-      width:100%;
-      height:240px;
-      object-fit:cover;
-      background:#1f2937;
-      cursor:zoom-in;
-    }
-
-    .card__body{
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      flex-grow:1;
-    }
-
-    .card__title{
-      font-size:18px;
-      margin-bottom:10px;
-    }
-
-    .card__meta{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:auto;
-      margin-bottom:16px;
-    }
-
-    .price{
-      color:var(--accent);
-      font-size:20px;
-      font-weight:900;
-    }
-
-    /* MODAL */
-
-    .modal{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.75);
-      display:none;
-      justify-content:center;
-      align-items:center;
-      z-index:9999;
-      backdrop-filter:blur(4px);
-    }
-
-    .modal.active{
-      display:flex;
-    }
-
-    .modal__content{
-      width:min(700px,92vw);
-      max-height:90vh;
-      overflow:auto;
-      background:#111827;
-      border-radius:20px;
-      padding:24px;
-      border:1px solid var(--border);
-    }
-
-    .formGroup{
-      margin-bottom:16px;
-    }
-
-    .formGroup label{
-      display:block;
-      margin-bottom:8px;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .formGroup input{
-      width:100%;
-      padding:13px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:#0f172a;
-      color:white;
-    }
-
-    .grid2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    /* ADMIN LIST */
-
-    .adminItem{
-      background:#0f172a;
-      padding:12px;
-      border-radius:14px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-bottom:12px;
-    }
-
-    .adminItem img{
-      width:70px;
-      height:70px;
-      border-radius:10px;
-      object-fit:cover;
-    }
-
-    .adminItem__info{
-      flex:1;
-    }
-
-    .adminActions{
-      display:flex;
-      gap:8px;
-    }
-
-    /* CART */
-
-    .cartSidebar{
-      position:fixed;
-      top:0;
-      right:-420px;
-      width:420px;
-      max-width:100%;
-      height:100vh;
-      background:#111827;
-      z-index:99999;
-      border-left:1px solid var(--border);
-      transition:.3s;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .cartSidebar.active{
-      right:0;
-    }
-
-    .cartHeader{
-      padding:20px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .cartBody{
-      flex:1;
-      overflow:auto;
-      padding:20px;
-    }
-
-    .cartFooter{
-      padding:20px;
-      border-top:1px solid var(--border);
-    }
-
-    .cartItem{
-      display:flex;
-      gap:12px;
-      background:#0f172a;
-      padding:12px;
-      border-radius:14px;
-      margin-bottom:12px;
-    }
-
-    .cartItem img{
-      width:70px;
-      height:70px;
-      border-radius:10px;
-      object-fit:cover;
-    }
-
-    .cartItem__info{
-      flex:1;
-    }
-
-    .qtyControls{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      margin-top:8px;
-    }
-
-    .qtyBtn{
-      width:28px;
-      height:28px;
-      border:none;
-      border-radius:8px;
-      background:#1f2937;
-      color:white;
-      cursor:pointer;
-      font-weight:900;
-    }
-
-    .removeBtn{
-      border:none;
-      background:var(--danger);
-      color:white;
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      margin-top:8px;
-    }
-
-    .couponBox{
-      display:flex;
-      gap:10px;
-      margin:14px 0;
-    }
-
-    .couponBox input{
-      flex:1;
-      padding:12px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background:#0f172a;
-      color:white;
-    }
-
-    /* PREVIEW */
-
-    .imagePreviewModal{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.9);
-      display:none;
-      justify-content:center;
-      align-items:center;
-      z-index:999999;
-    }
-
-    .imagePreviewModal.active{
-      display:flex;
-    }
-
-    .imagePreviewModal img{
-      max-width:90%;
-      max-height:90%;
-      border-radius:16px;
-    }
-
-    @media(max-width:700px){
-
-      .productsGrid{
-        grid-template-columns:1fr;
-      }
-
-      .grid2{
-        grid-template-columns:1fr;
-      }
-
-      .cartSidebar{
-        width:100%;
-      }
-
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kn2 Personalizados | Admin Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #0b0f17;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: rgba(255,255,255,.08);
+            --accent: #22c55e;
+            --danger: #ef4444;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x:hidden; }
+        .container { width:min(1200px, 92vw); margin:auto; }
+        .header { position:sticky; top:0; z-index:1000; background:rgba(11,15,23,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+        .header-inner { padding:15px 0; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-size:22px; font-weight:800; background:linear-gradient(to right, #22c55e, #10b981); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-decoration:none; }
+        .btn { border:none; cursor:pointer; border-radius:10px; padding:10px 18px; color:white; font-weight:600; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
+        .btn:hover { transform:translateY(-2px); opacity:.92; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-primary { background: var(--accent); }
+        .btn-dark { background:#1f2937; }
+        .btn-danger { background: var(--danger); }
+        .search-box { margin:30px 0; }
+        .search-input { width:100%; padding:16px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:white; outline:none; }
+        .filter-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+        .filter-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:8px 18px; border-radius:20px; cursor:pointer; }
+        .filter-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+        .cat-section { margin-bottom:50px; }
+        .cat-header { font-size:18px; margin-bottom:20px; display:flex; align-items:center; gap:15px; color:var(--text); }
+        .cat-header::after { content:''; flex:1; height:1px; background:var(--border); }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:25px; }
+        .card { background:var(--card); border-radius:20px; border:1px solid var(--border); overflow:hidden; transition:.3s; display:flex; flex-direction:column; }
+        .card:hover { transform:translateY(-4px); }
+        .card-img { width:100%; height:280px; object-fit:cover; cursor:zoom-in; }
+        .card-info { padding:20px; flex:1; display:flex; flex-direction:column; }
+        .card-price { color:var(--accent); font-size:22px; font-weight:800; margin:10px 0 15px; }
+        .cart-side { position:fixed; top:0; right:-420px; width:400px; max-width:100%; height:100vh; background:var(--card); z-index:2000; transition:.4s; border-left:1px solid var(--border); display:flex; flex-direction:column; }
+        .cart-side.active { right:0; }
+        .cart-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
+        .cart-items { flex:1; overflow-y:auto; padding:20px; }
+        .cart-footer { padding:25px; background:#0b0f17; border-top:1px solid var(--border); }
+        .modal { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+        .modal.active { display:flex; }
+        .modal-body { background:var(--card); padding:30px; border-radius:25px; width:100%; max-width:550px; max-height:90vh; overflow-y:auto; border:1px solid var(--border); }
+        .f-group { margin-bottom:15px; }
+        .f-group label { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+        .f-group input, .f-group select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:#0b0f17; color:white; outline: none; }
+        .adm-cat-group { margin-bottom:20px; padding:10px; background:rgba(255,255,255,0.02); border-radius:15px; }
+        .adm-cat-label { font-size:12px; font-weight:800; color:var(--accent); text-transform:uppercase; margin-bottom:10px; display:block; letter-spacing:1px; }
+        .adm-item { display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .adm-item img { width:40px; height:40px; border-radius:6px; object-fit:cover; }
+        .zoom-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:5000; }
+        .zoom-overlay.active { display:flex; }
+        .footer { background:#080b11; border-top:1px solid var(--border); padding:60px 0 30px; margin-top:100px; }
+        @media(max-width:768px){ .grid { grid-template-columns:1fr; } .cart-side { width:100%; } }
+    </style>
 </head>
-
 <body>
 
-  <header class="topbar">
-    <div class="container topbar__inner">
-
-      <div class="logo">
-        Kn2 Catálogo
-      </div>
-
-      <div class="topbar__actions">
-
-        <button class="btn btn-primary" onclick="toggleCart()">
-          🛒 <span id="cartCount">0</span>
-        </button>
-
-        <button class="btn btn-primary" id="openAdminBtn">
-          Painel Admin
-        </button>
-
-        <button class="btn btn-dark" id="logoutBtn" style="display:none">
-          Sair
-        </button>
-
-      </div>
-
-    </div>
-  </header>
-
-  <main class="container">
-
-    <section class="menu">
-      <div class="menu__row" id="menuRow"></div>
-    </section>
-
-    <section class="search">
-      <input
-        type="text"
-        id="searchInput"
-        placeholder="Pesquisar produto..."
-      />
-    </section>
-
-    <section id="catalogContainer"></section>
-
-    <p
-      id="emptyState"
-      hidden
-      style="padding:40px;text-align:center;color:gray"
-    >
-      Nenhum produto encontrado.
-    </p>
-
-  </main>
-
-  <div class="modal" id="loginModal">
-    <div class="modal__content">
-
-      <h2 style="margin-bottom:20px">
-        Login Restrito
-      </h2>
-
-      <div class="formGroup">
-        <label>E-mail</label>
-        <input type="email" id="adminEmail">
-      </div>
-
-      <div class="formGroup">
-        <label>Senha</label>
-        <input type="password" id="adminPassword">
-      </div>
-
-      <button class="btn btn-primary" style="width:100%" id="loginBtn">
-        Entrar
-      </button>
-
-      <button
-        class="btn btn-dark"
-        style="width:100%;margin-top:10px"
-        id="closeLoginBtn"
-      >
-        Cancelar
-      </button>
-
-    </div>
-  </div>
-
-  <div class="modal" id="adminModal">
-
-    <div class="modal__content">
-
-      <h2 style="margin-bottom:20px">
-        Produto
-      </h2>
-
-      <input type="hidden" id="editingId">
-
-      <div class="grid2">
-
-        <div class="formGroup">
-          <label>Nome</label>
-          <input type="text" id="productTitle">
+<header class="header">
+    <div class="container header-inner">
+        <a href="#" class="logo">Kn2 Personalizados</a>
+        <div style="display:flex; gap:12px">
+            <button class="btn btn-dark" onclick="toggleCart()">🛒 <span id="cartCount">0</span></button>
+            <button class="btn btn-dark" id="adminBtn">Admin</button>
+            <button class="btn btn-danger" id="logoutBtn" style="display:none">Sair</button>
         </div>
-
-        <div class="formGroup">
-          <label>Categoria</label>
-          <input type="text" id="productCategory">
-        </div>
-
-      </div>
-
-      <div class="grid2">
-
-        <div class="formGroup">
-          <label>Preço</label>
-          <input type="number" id="productPrice" step="0.01">
-        </div>
-
-        <div class="formGroup">
-          <label>Imagem</label>
-          <input type="file" id="productImage" accept="image/*">
-        </div>
-
-      </div>
-
-      <button
-        class="btn btn-primary"
-        style="width:100%"
-        id="saveProductBtn"
-      >
-        Salvar Produto
-      </button>
-
-      <hr style="margin:24px 0;opacity:.1">
-
-      <h3 style="margin-bottom:18px">
-        Produtos
-      </h3>
-
-      <div id="adminList"></div>
-
-      <button
-        class="btn btn-dark"
-        style="width:100%;margin-top:10px"
-        id="closeAdminBtn"
-      >
-        Fechar
-      </button>
-
     </div>
+</header>
 
-  </div>
-
-  <aside class="cartSidebar" id="cartSidebar">
-
-    <div class="cartHeader">
-
-      <h2>
-        Seu Carrinho
-      </h2>
-
-      <button
-        class="btn btn-dark"
-        onclick="toggleCart()"
-      >
-        ✕
-      </button>
-
+<main class="container">
+    <div class="search-box">
+        <div class="filter-row" id="filterRow"></div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar no catálogo...">
     </div>
+    <div id="catalog"></div>
+</main>
 
-    <div class="cartBody" id="cartItems"></div>
-
-    <div class="cartFooter">
-
-      <div class="couponBox">
-
-        <input
-          type="text"
-          id="couponInput"
-          placeholder="Cupom de desconto"
-        >
-
-        <button
-          class="btn btn-primary"
-          onclick="applyCoupon()"
-        >
-          Aplicar
-        </button>
-
-      </div>
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          margin-bottom:8px;
-        "
-      >
-        <span>Subtotal</span>
-        <strong id="subtotalPrice">
-          R$ 0,00
-        </strong>
-      </div>
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          margin-bottom:8px;
-        "
-      >
-        <span>Desconto</span>
-        <strong id="discountPrice">
-          R$ 0,00
-        </strong>
-      </div>
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          font-size:22px;
-          margin-top:16px;
-        "
-      >
-        <strong>Total</strong>
-
-        <strong style="color:var(--accent)" id="cartTotal">
-          R$ 0,00
-        </strong>
-      </div>
-
-      <button
-        class="btn btn-primary"
-        style="width:100%;margin-top:18px"
-        onclick="sendCartWhatsApp()"
-      >
-        Finalizar Pedido
-      </button>
-
+<div class="cart-side" id="cartSide">
+    <div class="cart-header"><h3>Meu Carrinho</h3><button class="btn" onclick="toggleCart()">✕</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+            <span>Total:</span><strong id="cartTotal" style="color:var(--accent); font-size:22px">R$ 0,00</strong>
+        </div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="sendToWhatsApp()">Finalizar Pedido</button>
     </div>
-
-  </aside>
-
-  <div
-    class="imagePreviewModal"
-    id="imagePreviewModal"
-    onclick="this.classList.remove('active')"
-  >
-    <img id="previewImage">
-  </div>
-
-  <script>
-
-    /* =========================
-       CONFIG
-    ========================= */
-
-    const SUPABASE_URL =
-      "https://kdoxzjdvpbdwpzyaqary.supabase.co";
-
-    const SUPABASE_KEY =
-      "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
-
-    const _supabase =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-
-    const WHATSAPP_NUMBER =
-      "5531999683959";
-
-    /* =========================
-       STATE
-    ========================= */
-
-    let products = [];
-
-    let cart = JSON.parse(
-      localStorage.getItem("cart")
-    ) || [];
-
-    let activeCategory = "Todos";
-
-    let searchQuery = "";
-
-    let discount = 0;
-
-    /* =========================
-       HELPERS
-    ========================= */
-
-    function formatBRL(value){
-      const n = Number(value) || 0;
-      return "R$ " + n.toFixed(2).replace('.', ',');
-    }
-
-    function escapeAttr(str){
-      return String(str ?? "")
-        .replaceAll('&', '&amp;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
-    }
-
-    /* =========================
-       INIT
-    ========================= */
-
-    async function init(){
-
-      await fetchProducts();
-
-      await checkUser();
-
-      renderMenu();
-
-      renderGrid();
-
-      updateCart();
-
-    }
-
-    /* =========================
-       PRODUCTS
-    ========================= */
-
-    async function fetchProducts(){
-
-      const { data, error } =
-        await _supabase
-          .from('produtos')
-          .select('*')
-          .order('created_at', {
-            ascending:false
-          });
-
-      if(!error){
-        products = data || [];
-      }
-
-    }
-
-    /* =========================
-       MENU
-    ========================= */
-
-    function renderMenu(){
-
-      const menuRow =
-        document.getElementById("menuRow");
-
-      menuRow.innerHTML = "";
-
-      const categories = [
-        "Todos",
-        ...new Set(
-          products
-            .map(p => p.category)
-            .filter(c => c && String(c).trim() !== "")
-        )
-      ];
-
-      categories.forEach(cat => {
-
-        const btn =
-          document.createElement("button");
-
-        btn.className =
-          `menu__btn ${
-            cat === activeCategory
-            ? 'active'
-            : ''
-          }`;
-
-        btn.textContent = cat;
-
-        btn.onclick = () => {
-
-          activeCategory = cat;
-
-          renderMenu();
-
-          renderGrid();
-
-        };
-
-        menuRow.appendChild(btn);
-
-      });
-
-    }
-
-    /* =========================
-       GRID
-    ========================= */
-
-    function renderGrid(){
-
-      const container =
-        document.getElementById(
-          "catalogContainer"
-        );
-
-      container.innerHTML = "";
-
-      const filtered = products.filter(p => {
-
-        const matchCat =
-          activeCategory === "Todos" ||
-          p.category === activeCategory;
-
-        const title = String(p.title ?? "").toLowerCase();
-        const matchSearch =
-          title.includes(searchQuery.toLowerCase());
-
-        return matchCat && matchSearch;
-
-      });
-
-      document.getElementById(
-        "emptyState"
-      ).hidden = filtered.length > 0;
-
-      const grouped = {};
-
-      filtered.forEach(p => {
-
-        const cat = p.category || "Sem categoria";
-
-        if(!grouped[cat]){
-          grouped[cat] = [];
-        }
-
-        grouped[cat].push(p);
-
-      });
-
-      for(const cat in grouped){
-
-        const section =
-          document.createElement("div");
-
-        section.className =
-          "categoryBlock";
-
-        section.innerHTML = `
-          <h2 class="categoryHeading">
-            ${escapeHtml(cat)}
-          </h2>
-        `;
-
-        const grid =
-          document.createElement("div");
-
-        grid.className = "productsGrid";
-
-        grouped[cat].forEach(p => {
-
-          const card =
-            document.createElement("div");
-
-          card.className = "card";
-
-          const safeId = escapeAttr(p.id);
-          const safeImg = escapeAttr(p.image_url);
-
-          card.innerHTML = `
-
-            <img
-              class="productImage"
-              src="${safeImg}"
-              loading="lazy"
-              onclick="showImg('${safeImg}')"
-              alt="${escapeAttr(p.title)}"
-            >
-
-            <div class="card__body">
-
-              <h3 class="card__title">
-                ${escapeHtml(p.title)}
-              </h3>
-
-              <div class="card__meta">
-
-                <span>
-                  ${escapeHtml(p.category)}
-                </span>
-
-                <span class="price">
-                  ${formatBRL(p.price)}
-                </span>
-
-              </div>
-
-              <button
-                class="btn btn-primary"
-                onclick="addToCart('${safeId}')"
-              >
-                Adicionar ao Carrinho
-              </button>
-
+</div>
+
+<div class="modal" id="adminModal">
+    <div class="modal-body">
+        <h2 id="modalTitle" style="margin-bottom:20px">Gerenciar</h2>
+        <input type="hidden" id="editId">
+        <div class="f-group"><label>Produto</label><input type="text" id="pTitle"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+            <div class="f-group"><label>Categoria</label>
+                <div style="display:flex; gap:5px"><select id="pCat"></select><button class="btn btn-dark" onclick="newCat()">+</button></div>
             </div>
-
-          `;
-
-          grid.appendChild(card);
-
-        });
-
-        section.appendChild(grid);
-
-        container.appendChild(section);
-
-      }
-
-    }
-
-    /* =========================
-       CART
-    ========================= */
-
-    function addToCart(id){
-
-      const product =
-        products.find(p => p.id == id);
-
-      if(!product) return;
-
-      const existing =
-        cart.find(item => item.id == id);
-
-      if(existing){
-
-        existing.quantity++;
-
-      } else {
-
-        cart.push({
-          ...product,
-          price: Number(product.price) || 0,
-          quantity: 1
-        });
-
-      }
-
-      updateCart();
-
-      toggleCart(true);
-
-    }
-
-    function increaseQty(id){
-
-      const item =
-        cart.find(i => i.id == id);
-
-      item.quantity++;
-
-      updateCart();
-
-    }
-
-    function decreaseQty(id){
-
-      const item =
-        cart.find(i => i.id == id);
-
-      item.quantity--;
-
-      if(item.quantity <= 0){
-
-        cart =
-          cart.filter(i => i.id != id);
-
-      }
-
-      updateCart();
-
-    }
-
-    function removeItem(id){
-
-      cart =
-        cart.filter(i => i.id != id);
-
-      updateCart();
-
-    }
-
-    function updateCart(){
-
-      localStorage.setItem(
-        "cart",
-        JSON.stringify(cart)
-      );
-
-      renderCart();
-
-      updateCartCount();
-
-    }
-
-    function updateCartCount(){
-
-      const totalItems =
-        cart.reduce(
-          (acc,item) =>
-            acc + item.quantity,
-          0
-        );
-
-      document.getElementById(
-        "cartCount"
-      ).textContent = totalItems;
-
-    }
-
-    function renderCart(){
-
-      const container =
-        document.getElementById(
-          "cartItems"
-        );
-
-      if(cart.length === 0){
-
-        container.innerHTML = `
-          <p style="
-            text-align:center;
-            color:gray;
-            margin-top:40px;
-          ">
-            Seu carrinho está vazio.
-          </p>
-        `;
-
-        document.getElementById(
-          "subtotalPrice"
-        ).textContent = "R$ 0,00";
-
-        document.getElementById(
-          "discountPrice"
-        ).textContent = "R$ 0,00";
-
-        document.getElementById(
-          "cartTotal"
-        ).textContent = "R$ 0,00";
-
-        return;
-
-      }
-
-      let subtotal = 0;
-
-      container.innerHTML =
-        cart.map(item => {
-
-          const total =
-            item.price * item.quantity;
-
-          subtotal += total;
-
-          const safeId = escapeAttr(item.id);
-
-          return `
-
-            <div class="cartItem">
-
-              <img src="${escapeAttr(item.image_url)}" alt="${escapeAttr(item.title)}">
-
-              <div class="cartItem__info">
-
-                <strong>
-                  ${escapeHtml(item.title)}
-                </strong>
-
-                <div style="
-                  margin-top:6px;
-                  color:var(--accent);
-                  font-weight:900;
-                ">
-                  ${formatBRL(total)}
-                </div>
-
-                <div class="qtyControls">
-
-                  <button
-                    class="qtyBtn"
-                    onclick="decreaseQty('${safeId}')"
-                  >
-                    -
-                  </button>
-
-                  <span>
-                    ${item.quantity}
-                  </span>
-
-                  <button
-                    class="qtyBtn"
-                    onclick="increaseQty('${safeId}')"
-                  >
-                    +
-                  </button>
-
-                </div>
-
-                <button
-                  class="removeBtn"
-                  onclick="removeItem('${safeId}')"
-                >
-                  Remover
-                </button>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }).join('');
-
-      const total =
-        Math.max(0, subtotal - discount);
-
-      document.getElementById(
-        "subtotalPrice"
-      ).textContent = formatBRL(subtotal);
-
-      document.getElementById(
-        "discountPrice"
-      ).textContent = formatBRL(discount);
-
-      document.getElementById(
-        "cartTotal"
-      ).textContent = formatBRL(total);
-
-    }
-
-    function toggleCart(forceOpen = false){
-
-      const sidebar =
-        document.getElementById(
-          "cartSidebar"
-        );
-
-      if(forceOpen){
-
-        sidebar.classList.add("active");
-
-      } else {
-
-        sidebar.classList.toggle("active");
-
-      }
-
-    }
-
-    function applyCoupon(){
-
-      const code =
-        document.getElementById(
-          "couponInput"
-        ).value
-        .trim()
-        .toUpperCase();
-
-      if(code === "KN210"){
-
-        discount = 10;
-
-        alert(
-          "Cupom aplicado: R$10 OFF"
-        );
-
-      } else {
-
-        discount = 0;
-
-        alert("Cupom inválido");
-
-      }
-
-      renderCart();
-
-    }
-
-    function sendCartWhatsApp(){
-
-      if(cart.length === 0){
-
-        return alert(
-          "Seu carrinho está vazio."
-        );
-
-      }
-
-      let subtotal = 0;
-
-      let message =
-        "Olá! Gostaria de fazer o pedido:%0A%0A";
-
-      cart.forEach(item => {
-
-        const total =
-          item.price * item.quantity;
-
-        subtotal += total;
-
-        message +=
-          `• ${item.title}` +
-          ` | Qtd: ${item.quantity}` +
-          ` | ${formatBRL(total)}%0A`;
-
-      });
-
-      const final =
-        Math.max(0, subtotal - discount);
-
-      message +=
-        `%0ASubtotal: ${formatBRL(subtotal)}`;
-
-      message +=
-        `%0ADesconto: ${formatBRL(discount)}`;
-
-      message +=
-        `%0A%0ATotal: ${formatBRL(final)}`;
-
-      window.open(
-        `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
-        '_blank'
-      );
-
-    }
-
-    /* =========================
-       IMAGE PREVIEW
-    ========================= */
-
-    function showImg(url){
-
-      document.getElementById(
-        "previewImage"
-      ).src = url;
-
-      document.getElementById(
-        "imagePreviewModal"
-      ).classList.add("active");
-
-    }
-
-    /* =========================
-       ADMIN
-    ========================= */
-
-    async function openAdminPanel(){
-
-      resetProductForm();
-
-      document.getElementById(
-        "adminModal"
-      ).classList.add("active");
-
-      renderAdminList();
-
-    }
-
-    function renderAdminList(){
-
-      const list =
-        document.getElementById(
-          "adminList"
-        );
-
-      list.innerHTML =
-        products.map(p => {
-          const safeId = escapeAttr(p.id);
-          return `
-
-          <div class="adminItem">
-
-            <img src="${escapeAttr(p.image_url)}" alt="${escapeAttr(p.title)}">
-
-            <div class="adminItem__info">
-
-              <strong>
-                ${escapeHtml(p.title)}
-              </strong>
-
-              <br>
-
-              ${formatBRL(p.price)}
-
-            </div>
-
-            <div class="adminActions">
-
-              <button
-                class="btn btn-primary"
-                onclick="editProduct('${safeId}')"
-              >
-                Editar
-              </button>
-
-              <button
-                class="btn btn-danger"
-                onclick="deleteProd('${safeId}')"
-              >
-                Excluir
-              </button>
-
-            </div>
-
-          </div>
-
-        `;
-        }).join('');
-
-    }
-
-    function resetProductForm(){
-      document.getElementById("editingId").value = "";
-      document.getElementById("productTitle").value = "";
-      document.getElementById("productCategory").value = "";
-      document.getElementById("productPrice").value = "";
-      document.getElementById("productImage").value = "";
-    }
-
-    function editProduct(id){
-
-      const p =
-        products.find(x => x.id == id);
-
-      if(!p) return;
-
-      document.getElementById(
-        "editingId"
-      ).value = p.id;
-
-      document.getElementById(
-        "productTitle"
-      ).value = p.title ?? "";
-
-      document.getElementById(
-        "productCategory"
-      ).value = p.category ?? "";
-
-      document.getElementById(
-        "productPrice"
-      ).value = p.price ?? "";
-
-      // limpa o file input (imagem é opcional ao editar)
-      document.getElementById(
-        "productImage"
-      ).value = "";
-
-      document.querySelector(
-        "#adminModal .modal__content"
-      ).scrollTo({ top: 0, behavior: 'smooth' });
-
-    }
-
-    async function compressImage(file){
-
-      return new Promise((resolve, reject) => {
-
+            <div class="f-group"><label>Preço</label><input type="text" id="pPrice" placeholder="R$ 0,00"></div>
+        </div>
+        <div class="f-group">
+            <label>Imagem (Upload local)</label>
+            <input type="file" id="pImageFile" accept="image/*">
+            <input type="hidden" id="pImg">
+        </div>
+        <div style="display:flex; gap:10px">
+            <button class="btn btn-primary" style="flex:1" id="saveBtn">Salvar</button>
+            <button class="btn btn-dark" onclick="closeAdmin()">Cancelar</button>
+        </div>
+        <div id="adminListAgrupada" style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px"></div>
+    </div>
+</div>
+
+<div class="modal" id="loginModal">
+    <div class="modal-body" style="max-width:350px">
+        <h2>Admin Login</h2><br>
+        <div class="f-group"><label>E-mail</label><input type="email" id="lEmail"></div>
+        <div class="f-group"><label>Senha</label><input type="password" id="lPass"></div>
+        <button class="btn btn-primary" style="width:100%" id="loginBtn">Entrar</button>
+    </div>
+</div>
+
+<div class="zoom-overlay" id="zoomModal" onclick="this.classList.remove('active')"><img src="" id="zoomImg" style="max-width:90%; max-height:90%; border-radius:10px"></div>
+
+<footer class="footer"><div class="container" style="text-align:center; color:var(--muted); font-size:12px">&copy; <span id="year"></span> Kn2 Personalizados.</div></footer>
+
+<script>
+const SB_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
+const SB_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
+const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+let products = [];
+let cart = JSON.parse(localStorage.getItem('kn2_cart')) || [];
+let activeCat = "Todos";
+let query = "";
+let categories = [];
+
+// Melhoria 5: Máscara
+function setupPriceMask() {
+    const input = document.getElementById('pPrice');
+    input.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, "");
+        value = (value / 100).toFixed(2) + "";
+        value = value.replace(".", ",");
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        e.target.value = value ? "R$ " + value : "";
+    });
+}
+
+// Melhoria 4: Otimização
+async function compressImage(file) {
+    return new Promise((resolve) => {
         const reader = new FileReader();
-
-        reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
-
-        reader.onload = e => {
-
-          const img = new Image();
-
-          img.onerror = () => reject(new Error("Imagem inválida"));
-
-          img.onload = () => {
-
-            const canvas =
-              document.createElement('canvas');
-
-            const MAX = 1200;
-
-            let width = img.width;
-            let height = img.height;
-
-            if(width > height){
-
-              if(width > MAX){
-
-                height *= MAX / width;
-                width = MAX;
-
-              }
-
-            } else {
-
-              if(height > MAX){
-
-                width *= MAX / height;
-                height = MAX;
-
-              }
-
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx =
-              canvas.getContext('2d');
-
-            ctx.drawImage(
-              img,
-              0,
-              0,
-              width,
-              height
-            );
-
-            canvas.toBlob(blob => {
-
-              if(!blob) return reject(new Error("Falha ao comprimir"));
-              resolve(blob);
-
-            }, 'image/jpeg', 0.75);
-
-          };
-
-          img.src = e.target.result;
-
-        };
-
         reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800;
+                const scale = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8);
+            };
+        };
+    });
+}
 
-      });
+async function init() {
+    await loadData();
+    await checkSession();
+    updateCartUI();
+    setupPriceMask();
+    document.getElementById('year').textContent = new Date().getFullYear();
+}
 
-    }
+async function loadData() {
+    const { data, error } = await _supabase.from('produtos').select('*').order('category', { ascending:true });
+    if(error) return;
+    products = data || [];
+    categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+    updateCatSelect();
+    render();
+}
 
-    document.getElementById(
-      "saveProductBtn"
-    ).onclick = async () => {
+function render(){
+    const filterContainer = document.getElementById('filterRow');
+    const cats = ["Todos", ...categories];
+    filterContainer.innerHTML = cats.map(c => `<button class="filter-btn ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>`).join('');
+    
+    let filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()));
+    if(activeCat !== "Todos") filtered = filtered.filter(p => p.category === activeCat);
 
-      const id =
-        document.getElementById(
-          "editingId"
-        ).value;
+    const grouped = filtered.reduce((acc, p) => {
+        if(!acc[p.category]) acc[p.category] = [];
+        acc[p.category].push(p);
+        return acc;
+    }, {});
 
-      const title =
-        document.getElementById(
-          "productTitle"
-        ).value.trim();
+    document.getElementById('catalog').innerHTML = Object.entries(grouped).map(([name, items]) => `
+        <section class="cat-section">
+            <h2 class="cat-header">${name}</h2>
+            <div class="grid">
+                ${items.map(p => `
+                    <div class="card">
+                        <img src="${p.image_url}" class="card-img" onclick="zoom('${p.image_url}')">
+                        <div class="card-info">
+                            <div style="font-weight:600">${p.title}</div>
+                            <div class="card-price">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</div>
+                            <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="justify-content:center">🛒 Adicionar</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
+    `).join('');
+}
 
-      const category =
-        document.getElementById(
-          "productCategory"
-        ).value.trim();
+function setCat(c){ activeCat = c; render(); }
+function zoom(url){ document.getElementById('zoomImg').src = url; document.getElementById('zoomModal').classList.add('active'); }
+function toggleCart(){ document.getElementById('cartSide').classList.toggle('active'); }
 
-      const priceRaw =
-        document.getElementById(
-          "productPrice"
-        ).value;
+function addToCart(id){
+    const p = products.find(x => x.id == id);
+    const exists = cart.find(x => x.id == id);
+    if(exists) exists.qty++; else cart.push({ ...p, qty:1 });
+    updateCartUI();
+}
 
-      const price = parseFloat(priceRaw);
+function updateCartUI(){
+    localStorage.setItem('kn2_cart', JSON.stringify(cart));
+    document.getElementById('cartCount').textContent = cart.reduce((a,b) => a + b.qty, 0);
+    let total = 0;
+    document.getElementById('cartItems').innerHTML = cart.map(i => {
+        total += i.price * i.qty;
+        return `<div style="display:flex; gap:10px; margin-bottom:10px">
+            <img src="${i.image_url}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
+            <div style="flex:1; font-size:12px"><strong>${i.title}</strong><br>${i.qty}x R$ ${Number(i.price).toFixed(2)}</div>
+            <button onclick="remCart('${i.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer">✕</button>
+        </div>`;
+    }).join('');
+    document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
 
-      const imageInput =
-        document.getElementById(
-          "productImage"
-        );
+function remCart(id){ cart = cart.filter(x => x.id != id); updateCartUI(); }
 
-      if(!title || !category || isNaN(price) || price < 0){
-        return alert("Preencha nome, categoria e preço válido.");
-      }
+function sendToWhatsApp(){
+    let msg = "Olá Kn2! Pedido:\n" + cart.map(i => `• ${i.title} (${i.qty}x)`).join('\n');
+    window.open(`https://wa.me/5531999683959?text=${encodeURIComponent(msg)}`);
+}
 
-      // Ao criar (sem id), imagem é obrigatória
-      if(!id && !imageInput.files[0]){
-        return alert("Selecione uma imagem para o produto.");
-      }
+async function checkSession(){
+    const { data:{ user } } = await _supabase.auth.getUser();
+    if(user) document.getElementById('logoutBtn').style.display = 'block';
+    return !!user;
+}
 
-      let image_url = null;
+document.getElementById('adminBtn').onclick = async () => {
+    if(await checkSession()){ document.getElementById('adminModal').classList.add('active'); renderAdmList(); }
+    else document.getElementById('loginModal').classList.add('active');
+};
 
-      try {
+document.getElementById('loginBtn').onclick = async () => {
+    const { error } = await _supabase.auth.signInWithPassword({ email: document.getElementById('lEmail').value, password: document.getElementById('lPass').value });
+    if(error) alert('Erro'); else location.reload();
+};
 
-        if(imageInput.files[0]){
+document.getElementById('logoutBtn').onclick = async () => { await _supabase.auth.signOut(); location.reload(); };
 
-          const compressed =
-            await compressImage(
-              imageInput.files[0]
-            );
+function updateCatSelect(){
+    document.getElementById('pCat').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+}
 
-          const fileName =
-            Date.now() + ".jpg";
+function newCat(){
+    const n = prompt('Nova Categoria:');
+    if(n) { categories.push(n); updateCatSelect(); document.getElementById('pCat').value = n; }
+}
 
-          // ALTERAÇÃO PARA CORRIGIR BUCKET NOT FOUND:
-          // Mudamos de 'imagens-produtos' para 'imagens' e removemos a subpasta 'produtos/'
-          const { error:uploadError } =
-            await _supabase
-              .storage
-              .from('imagens') 
-              .upload(
-                fileName,
-                compressed
-              );
+function renderAdmList(){
+    document.getElementById('adminListAgrupada').innerHTML = products.map(p => `
+        <div class="adm-item">
+            <img src="${p.image_url}">
+            <span style="flex:1; font-size:13px">${p.title}</span>
+            <button class="btn btn-primary" onclick="edit('${p.id}')">✏️</button>
+            <button class="btn btn-danger" onclick="del('${p.id}')">🗑️</button>
+        </div>
+    `).join('');
+}
 
-          if(uploadError)
-            throw uploadError;
+window.edit = (id) => {
+    const p = products.find(x => x.id == id);
+    document.getElementById('editId').value = p.id;
+    document.getElementById('pTitle').value = p.title;
+    document.getElementById('pCat').value = p.category;
+    document.getElementById('pPrice').value = "R$ " + Number(p.price).toFixed(2).replace('.', ',');
+    document.getElementById('pImg').value = p.image_url;
+};
 
-          const {
-            data:{ publicUrl }
-          } =
-            _supabase
-              .storage
-              .from('imagens')
-              .getPublicUrl(fileName);
+document.getElementById('saveBtn').onclick = async () => {
+    const btn = document.getElementById('saveBtn');
+    const fileInput = document.getElementById('pImageFile');
+    let imageUrl = document.getElementById('pImg').value;
+    
+    btn.disabled = true;
+    btn.textContent = "Processando...";
 
-          image_url = publicUrl;
+    try {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const optimized = await compressImage(file);
+            const fileName = `${Date.now()}_prod.jpg`;
+            
+            // CORREÇÃO CRITICAL: Enviar para 'imagens' sem pastas extras
+            const { data, error: uploadError } = await _supabase.storage
+                .from('imagens')
+                .upload(fileName, optimized);
 
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = _supabase.storage.from('imagens').getPublicUrl(fileName);
+            imageUrl = publicUrl;
         }
 
-        if(id){
-
-          const payload = {
-            title,
-            category,
-            price:parseFloat(price)
-          };
-
-          if(image_url){
-            payload.image_url = image_url;
-          }
-
-          const { error } =
-            await _supabase
-              .from('produtos')
-              .update(payload)
-              .eq('id', id);
-
-          if(error) throw error;
-
-          alert("Produto atualizado!");
-
-        } else {
-
-          const { error } =
-            await _supabase
-              .from('produtos')
-              .insert([{
-                title,
-                category,
-                price:parseFloat(price),
-                image_url
-              }]);
-
-          if(error) throw error;
-
-          alert("Produto criado!");
-
-        }
-
+        const rawPrice = document.getElementById('pPrice').value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+        const payload = { title: document.getElementById('pTitle').value, category: document.getElementById('pCat').value, price: parseFloat(rawPrice), image_url: imageUrl };
+        
+        const id = document.getElementById('editId').value;
+        const { error } = id ? await _supabase.from('produtos').update(payload).eq('id', id) : await _supabase.from('produtos').insert([payload]);
+        
+        if(error) throw error;
         location.reload();
-
-      } catch(err){
-
-        alert(
-          "Erro na operação: " + err.message
-        );
-
-      }
-
-    };
-
-    async function deleteProd(id){
-
-      if(!confirm(
-        "Excluir produto?"
-      )) return;
-
-      const { error } =
-        await _supabase
-          .from('produtos')
-          .delete()
-          .eq('id', id);
-
-      if(!error){
-
-        alert("Excluído");
-
-        location.reload();
-
-      }
-
+    } catch (err) {
+        alert("Erro na operação: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Salvar";
     }
+};
 
-    /* =========================
-       AUTH
-    ========================= */
+window.del = async (id) => {
+    if(confirm('Excluir?')) { await _supabase.from('produtos').delete().eq('id', id); location.reload(); }
+};
 
-    document.getElementById(
-      "loginBtn"
-    ).onclick = async () => {
+function closeAdmin(){ document.getElementById('adminModal').classList.remove('active'); }
+document.getElementById('searchInput').oninput = (e) => { query = e.target.value; render(); };
 
-      const email =
-        document.getElementById(
-          "adminEmail"
-        ).value;
-
-      const password =
-        document.getElementById(
-          "adminPassword"
-        ).value;
-
-      const { error } =
-        await _supabase.auth
-          .signInWithPassword({
-            email,
-            password
-          });
-
-      if(error){
-
-        alert(error.message);
-
-      } else {
-
-        document.getElementById(
-          "loginModal"
-        ).classList.remove("active");
-
-        checkUser();
-
-        openAdminPanel();
-
-      }
-
-    };
-
-    async function checkUser(){
-
-      const {
-        data:{ user }
-      } =
-        await _supabase.auth.getUser();
-
-      if(user){
-
-        document.getElementById(
-          "logoutBtn"
-        ).style.display = "block";
-
-      }
-
-    }
-
-    document.getElementById(
-      "logoutBtn"
-    ).onclick = async () => {
-
-      await _supabase.auth.signOut();
-
-      location.reload();
-
-    };
-
-    document.getElementById(
-      "openAdminBtn"
-    ).onclick = async () => {
-
-      const {
-        data:{ user }
-      } =
-        await _supabase.auth.getUser();
-
-      if(user){
-
-        openAdminPanel();
-
-      } else {
-
-        document.getElementById(
-          "loginModal"
-        ).classList.add("active");
-
-      }
-
-    };
-
-    /* =========================
-       CLOSE MODALS
-    ========================= */
-
-    document.getElementById(
-      "closeLoginBtn"
-    ).onclick = () => {
-
-      document.getElementById(
-        "loginModal"
-      ).classList.remove("active");
-
-    };
-
-    document.getElementById(
-      "closeAdminBtn"
-    ).onclick = () => {
-
-      document.getElementById(
-        "adminModal"
-      ).classList.remove("active");
-
-    };
-
-    document.getElementById(
-      "searchInput"
-    ).oninput = e => {
-
-      searchQuery = e.target.value;
-
-      renderGrid();
-
-    };
-
-    /* =========================
-       START
-    ========================= */
-
-    init();
-
-  </script>
-
+init();
+</script>
 </body>
 </html>
