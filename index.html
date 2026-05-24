@@ -1054,6 +1054,125 @@ init();
 </html>
 ```
 
+## UPLOAD LOCAL DE IMAGEM — CORRIGIDO
+
+Substitua o campo antigo de URL por este:
+
+```html
+<div class="f-group">
+    <label>Imagem Produto</label>
+
+    <input
+        type="file"
+        id="pFile"
+        accept="image/*"
+    >
+
+    <input type="hidden" id="pImg">
+
+    <img
+        id="previewImg"
+        style="
+            width:100%;
+            margin-top:10px;
+            border-radius:12px;
+            display:none;
+            max-height:250px;
+            object-fit:cover;
+        "
+    >
+</div>
+```
+
+Adicione este script antes do saveBtn.onclick:
+
+```javascript
+// UPLOAD IMAGEM LOCAL
+
+document.getElementById('pFile').addEventListener('change', async (e) => {
+
+    const file = e.target.files[0];
+
+    if(!file) return;
+
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const { error } = await _supabase
+        .storage
+        .from('produtos')
+        .upload(fileName, file);
+
+    if(error){
+        console.error(error);
+        return alert('Erro upload imagem');
+    }
+
+    const { data } = _supabase
+        .storage
+        .from('produtos')
+        .getPublicUrl(fileName);
+
+    document.getElementById('pImg').value = data.publicUrl;
+
+    const preview = document.getElementById('previewImg');
+
+    preview.src = data.publicUrl;
+
+    preview.style.display = 'block';
+});
+```
+
+Dentro do edit() deixe assim:
+
+```javascript
+document.getElementById('pImg').value = p.image_url;
+
+const preview = document.getElementById('previewImg');
+
+preview.src = p.image_url;
+
+preview.style.display = 'block';
+```
+
+Depois do save adicione:
+
+```javascript
+document.getElementById('pFile').value = '';
+
+const preview = document.getElementById('previewImg');
+
+preview.src = '';
+
+preview.style.display = 'none';
+```
+
+## SQL STORAGE SUPABASE
+
+Rode no SQL Editor:
+
+```sql
+insert into storage.buckets
+(id, name, public)
+values
+('produtos', 'produtos', true);
+```
+
+```sql
+create policy "Upload publico produtos"
+on storage.objects
+for insert
+to public
+with check (bucket_id = 'produtos');
+```
+
+```sql
+create policy "Ver imagens produtos"
+on storage.objects
+for select
+to public
+using (bucket_id = 'produtos');
+```
+
 ## IMPORTANTE NO SUPABASE
 
 Ative o realtime da tabela:
@@ -1065,9 +1184,3 @@ Ative o realtime da tabela:
 5. Habilite INSERT UPDATE DELETE
 
 Sem isso a atualização automática não funciona.
-
-
-
-
-
-
