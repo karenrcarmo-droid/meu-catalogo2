@@ -3,180 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kn2 Personalizados | Oficial</title>
+    <title>Kn2 Personalizados</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #0b0f17; --card: #111827; --accent: #22c55e; --text: #f3f4f6; --border: rgba(255,255,255,.08); }
-        body { background: var(--bg); color: var(--text); font-family: system-ui; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .container { width: min(1200px, 94vw); margin: auto; }
-        
-        /* HEADER */
-        .topbar { position: sticky; top: 0; background: rgba(11,15,23,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 12px 0; z-index: 1000; }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* CATEGORIAS */
-        .cat-nav { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; scrollbar-width: none; }
-        .cat-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: white; cursor: pointer; white-space: nowrap; font-size: 14px; }
-        .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
-
-        /* GRID */
-        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding-bottom: 50px; }
-        .card { background: var(--card); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: .3s; display: flex; flex-direction: column; }
-        .productImage { width: 100%; height: 260px; object-fit: cover; cursor: pointer; background: #1f2937; }
-        
-        /* BOTÕES */
-        .btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: .2s; text-align: center; }
-        .btn-primary { background: var(--accent); color: #000; width: 100%; }
-        .btn-dark { background: #1f2937; color: white; }
-        
-        /* LIKES */
-        .like-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(5px); font-size: 14px; z-index: 10; border: 1px solid rgba(255,255,255,0.1); }
+        :root { --bg: #0b0f17; --accent: #22c55e; --card: #111827; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; }
+        .topbar { background: #111827; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; position: sticky; top:0; z-index:99; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+        .card { background: var(--card); border-radius: 15px; border: 1px solid #333; overflow: hidden; }
+        .img { width: 100%; height: 250px; object-fit: cover; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <header class="topbar">
-        <div class="container header-inner">
-            <div style="font-size: 20px; font-weight: 900; letter-spacing: -1px;">Kn2 <span style="color:var(--accent)">Artes</span></div>
-            <div style="display: flex; gap: 8px;">
-                <a href="https://www.instagram.com/arteskn2?igsh=bmpsYW9kdHgzdzlp" target="_blank" class="btn btn-dark" style="padding: 8px 12px; font-size: 13px; text-decoration: none;">📸 Insta</a>
-                <button class="btn btn-primary" style="width: auto; padding: 8px 15px;">🛒 <span id="cartCount">0</span></button>
-            </div>
-        </div>
+        <b style="font-size: 20px;">Kn2 <span style="color:var(--accent)">Artes</span></b>
+        <button class="btn" style="width: auto;" onclick="location.reload()">🔄 Atualizar</button>
     </header>
 
-    <main class="container">
-        <input type="text" id="searchInput" placeholder="Buscar produto..." style="width:100%; height:50px; border-radius:15px; background:#111827; color:#fff; border:1px solid var(--border); padding:0 15px; margin: 20px 0 10px 0; outline: none;">
-        
-        <div class="cat-nav" id="categoryNav"></div>
-        <div id="catalogContainer" class="productsGrid">Carregando catálogo...</div>
-    </main>
-
-    <footer style="text-align: center; padding: 30px; opacity: 0.5; font-size: 12px; border-top: 1px solid var(--border);">
-        Visitas: <span id="visitCount">...</span> | Kn2 © 2024
-    </footer>
+    <div id="catalog" class="grid">Carregando catálogo...</div>
 
     <script>
-        // CONFIGURAÇÕES SUPABASE - VERIFIQUE SE AS CHAVES ESTÃO CORRETAS
-       const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
+        // Use as suas credenciais reais aqui
+        const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
     const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let prods = [];
 
-        let allProducts = [];
-        let currentCategory = "Todos";
-        let cartTotal = 0;
-
-        async function startSite() {
+        async function carregar() {
             try {
-                // 1. Carrega os produtos primeiro (essencial)
-                const { data, error } = await _supabase.from('produtos').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                allProducts = data || [];
+                const { data } = await _supabase.from('produtos').select('*').order('created_at', { ascending: false });
+                prods = data || [];
+                render();
                 
-                renderCategories();
-                renderGrid();
-                
-                // 2. Carrega visitas (Se der erro aqui, o site NÃO trava)
-                updateVisitCounter();
+                // Tenta atualizar visitas, mas se der erro, NÃO TRAVA o site
+                _supabase.from('estatisticas').select('visitas').eq('id', 1).single().then(({data}) => {
+                    if(data) _supabase.from('estatisticas').update({visitas: data.visitas + 1}).eq('id', 1);
+                }).catch(() => {});
+
             } catch (e) {
-                console.error("Erro ao iniciar catálogo:", e);
-                document.getElementById('catalogContainer').innerHTML = "<p style='text-align:center; padding:50px;'>Erro de conexão com o banco de dados.</p>";
+                document.getElementById('catalog').innerHTML = "Erro ao carregar banco.";
             }
         }
 
-        async function updateVisitCounter() {
-            try {
-                const { data } = await _supabase.from('estatisticas').select('visitas').eq('id', 1).single();
-                if (data) {
-                    const novoTotal = data.visitas + 1;
-                    document.getElementById('visitCount').innerText = novoTotal;
-                    await _supabase.from('estatisticas').update({ visitas: novoTotal }).eq('id', 1);
-                }
-            } catch (err) { console.warn("Contador de visitas desativado."); }
-        }
-
-        function renderCategories() {
-            const container = document.getElementById('categoryNav');
-            const categories = ["Todos", ...new Set(allProducts.map(p => p.category))];
-            container.innerHTML = categories.map(cat => `
-                <button class="cat-btn ${currentCategory === cat ? 'active' : ''}" onclick="window.filtrarCategoria('${cat}')">${cat}</button>
-            `).join('');
-        }
-
-        function renderGrid() {
-            const container = document.getElementById('catalogContainer');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            
-            const filtered = allProducts.filter(p => {
-                const matchCat = currentCategory === "Todos" || p.category === currentCategory;
-                const matchSearch = p.title.toLowerCase().includes(search);
-                return matchCat && matchSearch;
-            });
-
-            if(filtered.length === 0) {
-                container.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding:40px; opacity:0.5;'>Nenhum produto encontrado.</p>";
-                return;
-            }
-
-            container.innerHTML = filtered.map(p => `
+        function render() {
+            const container = document.getElementById('catalog');
+            container.innerHTML = prods.map(p => `
                 <div class="card">
-                    <div class="like-badge" onclick="window.curtirProduto('${p.id}', ${p.likes || 0})">❤️ <span>${p.likes || 0}</span></div>
-                    <img src="${p.image_url}" class="productImage" onclick="window.open('${p.image_url}', '_blank')">
-                    <div style="padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">${p.title}</h3>
-                            <div style="color: var(--accent); font-size: 20px; font-weight: 900; margin: 10px 0;">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-                        </div>
-                        <button class="btn btn-primary" onclick="window.adicionarPedido('${p.id}')">Adicionar Pedido</button>
+                    <img src="${p.image_url}" class="img">
+                    <div style="padding: 15px;">
+                        <h3 style="margin:0 0 10px 0">${p.title}</h3>
+                        <p style="color:var(--accent); font-size: 20px; font-weight: bold;">R$ ${p.price.toFixed(2)}</p>
+                        <button class="btn" onclick="comprar('${p.title}', ${p.price})">🛒 Pedir no Zap</button>
+                        <button onclick="curtir('${p.id}', ${p.likes || 0})" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">❤️ Curtir (${p.likes || 0})</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        /* --- FUNÇÕES GLOBAIS (PARA NÃO DAR "IS NOT DEFINED") --- */
-
-        window.filtrarCategoria = (cat) => {
-            currentCategory = cat;
-            renderCategories();
-            renderGrid();
+        window.comprar = (nome, preco) => {
+            const msg = encodeURIComponent(`Olá! Quero pedir: ${nome} (R$ ${preco.toFixed(2)})`);
+            window.open(`https://wa.me/5531999683959?text=${msg}`);
         };
 
-        window.curtirProduto = async (id, currentLikes) => {
-            const badge = event.currentTarget.querySelector('span');
-            badge.innerText = currentLikes + 1; // Efeito instantâneo na tela
-            
-            try {
-                await _supabase.from('produtos').update({ likes: currentLikes + 1 }).eq('id', id);
-            } catch (e) { console.error("Erro ao salvar like"); }
+        window.curtir = async (id, atual) => {
+            await _supabase.from('produtos').update({ likes: atual + 1 }).eq('id', id);
+            carregar(); // Recarrega só para atualizar o número
         };
 
-        window.adicionarPedido = (id) => {
-            const p = allProducts.find(x => x.id === id);
-            cartTotal++;
-            document.getElementById('cartCount').innerText = cartTotal;
-            
-            // Feedback visual no botão
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "✅ ADICIONADO";
-            btn.style.background = "#fff";
-            
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.style.background = "";
-                
-                if(confirm(`Produto "${p.title}" adicionado!\nDeseja fechar o pedido no WhatsApp agora?`)) {
-                    const texto = encodeURIComponent(`Olá! Quero pedir o produto: ${p.title} (R$ ${p.price.toFixed(2)})`);
-                    window.open(`https://wa.me/5531999683959?text=${texto}`, '_blank');
-                }
-            }, 600);
-        };
-
-        // Escuta a pesquisa
-        document.getElementById('searchInput').oninput = () => renderGrid();
-
-        // Inicia tudo
-        startSite();
+        carregar();
     </script>
 </body>
 </html>
