@@ -1,78 +1,1886 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kn2 Personalizados</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --bg: #0b0f17; --accent: #22c55e; --card: #111827; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; }
-        .topbar { background: #111827; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; position: sticky; top:0; z-index:99; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-        .card { background: var(--card); border-radius: 15px; border: 1px solid #333; overflow: hidden; }
-        .img { width: 100%; height: 250px; object-fit: cover; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Kn2 Catálogo</title>
+
+  <meta name="theme-color" content="#0b0f17">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: rgba(255,255,255,.08);
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui;
+    }
+
+    .container{
+      width:min(1200px,92vw);
+      margin:auto;
+    }
+
+    /* TOPBAR */
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      backdrop-filter:blur(10px);
+      background:rgba(11,15,23,.9);
+      border-bottom:1px solid var(--border);
+    }
+
+    .topbar__inner{
+      padding:16px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .logo{
+      font-size:30px;
+      font-weight:900;
+    }
+
+    .topbar__actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:12px 16px;
+      color:white;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .btn-primary{
+      background:var(--accent);
+    }
+
+    .btn-dark{
+      background:#1f2937;
+    }
+
+    .btn-danger{
+      background:var(--danger);
+    }
+
+    /* MENU */
+
+    .menu{
+      margin-top:20px;
+    }
+
+    .menu__row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .menu__btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:white;
+      padding:10px 16px;
+      border-radius:999px;
+      cursor:pointer;
+    }
+
+    .menu__btn.active{
+      background:rgba(34,197,94,.12);
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+
+    /* SEARCH */
+
+    .search{
+      margin:20px 0;
+    }
+
+    .search input{
+      width:100%;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#111827;
+      color:white;
+      outline:none;
+    }
+
+    /* GRID */
+
+    .categoryBlock{
+      margin-bottom:50px;
+    }
+
+    .categoryHeading{
+      margin-bottom:18px;
+      border-bottom:1px solid var(--border);
+      padding-bottom:10px;
+    }
+
+    .productsGrid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+      gap:16px;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      transition:.25s;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .card:hover{
+      transform:translateY(-4px);
+    }
+
+    .productImage{
+      width:100%;
+      height:240px;
+      object-fit:cover;
+      background:#1f2937;
+      cursor:zoom-in;
+    }
+
+    .card__body{
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      flex-grow:1;
+    }
+
+    .card__title{
+      font-size:18px;
+      margin-bottom:10px;
+    }
+
+    .card__meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:auto;
+      margin-bottom:16px;
+    }
+
+    .price{
+      color:var(--accent);
+      font-size:20px;
+      font-weight:900;
+    }
+
+    /* MODAL */
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.75);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+      backdrop-filter:blur(4px);
+    }
+
+    .modal.active{
+      display:flex;
+    }
+
+    .modal__content{
+      width:min(700px,92vw);
+      max-height:90vh;
+      overflow:auto;
+      background:#111827;
+      border-radius:20px;
+      padding:24px;
+      border:1px solid var(--border);
+    }
+
+    .formGroup{
+      margin-bottom:16px;
+    }
+
+    .formGroup label{
+      display:block;
+      margin-bottom:8px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .formGroup input{
+      width:100%;
+      padding:13px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0f172a;
+      color:white;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    /* ADMIN LIST */
+
+    .adminItem{
+      background:#0f172a;
+      padding:12px;
+      border-radius:14px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+
+    .adminItem img{
+      width:70px;
+      height:70px;
+      border-radius:10px;
+      object-fit:cover;
+    }
+
+    .adminItem__info{
+      flex:1;
+    }
+
+    .adminActions{
+      display:flex;
+      gap:8px;
+    }
+
+    /* CART */
+
+    .cartSidebar{
+      position:fixed;
+      top:0;
+      right:-420px;
+      width:420px;
+      max-width:100%;
+      height:100vh;
+      background:#111827;
+      z-index:99999;
+      border-left:1px solid var(--border);
+      transition:.3s;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .cartSidebar.active{
+      right:0;
+    }
+
+    .cartHeader{
+      padding:20px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .cartBody{
+      flex:1;
+      overflow:auto;
+      padding:20px;
+    }
+
+    .cartFooter{
+      padding:20px;
+      border-top:1px solid var(--border);
+    }
+
+    .cartItem{
+      display:flex;
+      gap:12px;
+      background:#0f172a;
+      padding:12px;
+      border-radius:14px;
+      margin-bottom:12px;
+    }
+
+    .cartItem img{
+      width:70px;
+      height:70px;
+      border-radius:10px;
+      object-fit:cover;
+    }
+
+    .cartItem__info{
+      flex:1;
+    }
+
+    .qtyControls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-top:8px;
+    }
+
+    .qtyBtn{
+      width:28px;
+      height:28px;
+      border:none;
+      border-radius:8px;
+      background:#1f2937;
+      color:white;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .removeBtn{
+      border:none;
+      background:var(--danger);
+      color:white;
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      margin-top:8px;
+    }
+
+    .couponBox{
+      display:flex;
+      gap:10px;
+      margin:14px 0;
+    }
+
+    .couponBox input{
+      flex:1;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0f172a;
+      color:white;
+    }
+
+    /* PREVIEW */
+
+    .imagePreviewModal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.9);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:999999;
+    }
+
+    .imagePreviewModal.active{
+      display:flex;
+    }
+
+    .imagePreviewModal img{
+      max-width:90%;
+      max-height:90%;
+      border-radius:16px;
+    }
+
+    @media(max-width:700px){
+
+      .productsGrid{
+        grid-template-columns:1fr;
+      }
+
+      .grid2{
+        grid-template-columns:1fr;
+      }
+
+      .cartSidebar{
+        width:100%;
+      }
+
+    }
+
+    .siteFooter{
+      margin-top:48px;
+      padding:24px 16px;
+      border-top:1px solid var(--border, #e5e5e5);
+      background:var(--surface, #fafafa);
+    }
+    .siteFooter__inner{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      color:var(--muted, #666);
+      font-size:14px;
+    }
+    .siteFooter__social{
+      display:flex;
+      gap:12px;
+    }
+    .siteFooter__socialLink{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--accent, #e1306c);
+      text-decoration:none;
+      font-weight:500;
+      transition:opacity .2s;
+    }
+    .siteFooter__socialLink:hover{
+      opacity:.75;
+    }
+  </style>
 </head>
+
 <body>
 
-    <header class="topbar">
-        <b style="font-size: 20px;">Kn2 <span style="color:var(--accent)">Artes</span></b>
-        <button class="btn" style="width: auto;" onclick="location.reload()">🔄 Atualizar</button>
-    </header>
+  <!-- TOPBAR -->
 
-    <div id="catalog" class="grid">Carregando catálogo...</div>
+  <header class="topbar">
+    <div class="container topbar__inner">
 
-    <script>
-        // Use as suas credenciais reais aqui
-        const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V"; 
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let prods = [];
+      <div class="logo">
+        Kn2 Catálogo
+      </div>
 
-        async function carregar() {
-            try {
-                const { data } = await _supabase.from('produtos').select('*').order('created_at', { ascending: false });
-                prods = data || [];
-                render();
-                
-                // Tenta atualizar visitas, mas se der erro, NÃO TRAVA o site
-                _supabase.from('estatisticas').select('visitas').eq('id', 1).single().then(({data}) => {
-                    if(data) _supabase.from('estatisticas').update({visitas: data.visitas + 1}).eq('id', 1);
-                }).catch(() => {});
+      <div class="topbar__actions">
 
-            } catch (e) {
-                document.getElementById('catalog').innerHTML = "Erro ao carregar banco.";
-            }
+        <button class="btn btn-primary" onclick="toggleCart()">
+          🛒 <span id="cartCount">0</span>
+        </button>
+
+        <button class="btn btn-primary" id="openAdminBtn">
+          Painel Admin
+        </button>
+
+        <button class="btn btn-dark" id="logoutBtn" style="display:none">
+          Sair
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN -->
+
+  <main class="container">
+
+    <section class="menu">
+      <div class="menu__row" id="menuRow"></div>
+    </section>
+
+    <section class="search">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Pesquisar produto..."
+      />
+    </section>
+
+    <section id="catalogContainer"></section>
+
+    <p
+      id="emptyState"
+      hidden
+      style="padding:40px;text-align:center;color:gray"
+    >
+      Nenhum produto encontrado.
+    </p>
+
+  </main>
+
+  <!-- LOGIN -->
+
+  <div class="modal" id="loginModal">
+    <div class="modal__content">
+
+      <h2 style="margin-bottom:20px">
+        Login Restrito
+      </h2>
+
+      <div class="formGroup">
+        <label>E-mail</label>
+        <input type="email" id="adminEmail">
+      </div>
+
+      <div class="formGroup">
+        <label>Senha</label>
+        <input type="password" id="adminPassword">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" id="loginBtn">
+        Entrar
+      </button>
+
+      <button
+        class="btn btn-dark"
+        style="width:100%;margin-top:10px"
+        id="closeLoginBtn"
+      >
+        Cancelar
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+
+  <div class="modal" id="adminModal">
+
+    <div class="modal__content">
+
+      <h2 style="margin-bottom:20px">
+        Produto
+      </h2>
+
+      <input type="hidden" id="editingId">
+
+      <div class="grid2">
+
+        <div class="formGroup">
+          <label>Nome</label>
+          <input type="text" id="productTitle">
+        </div>
+
+        <div class="formGroup">
+          <label>Categoria</label>
+          <select id="productCategory"></select>
+          <button type="button" id="addCategoryBtn" class="btn btn--ghost" style="margin-top:6px">+ Nova categoria</button>
+        </div>
+
+      </div>
+
+      <div class="grid2">
+
+        <div class="formGroup">
+          <label>Preço</label>
+          <input type="number" id="productPrice" step="0.01">
+        </div>
+
+        <div class="formGroup">
+          <label>Imagem</label>
+          <input type="file" id="productImage" accept="image/*">
+        </div>
+
+      </div>
+
+      <button
+        class="btn btn-primary"
+        style="width:100%"
+        id="saveProductBtn"
+      >
+        Salvar Produto
+      </button>
+
+      <hr style="margin:24px 0;opacity:.1">
+
+      <h3 style="margin-bottom:18px">
+        Produtos
+      </h3>
+
+      <div id="adminList"></div>
+
+      <button
+        class="btn btn-dark"
+        style="width:100%;margin-top:10px"
+        id="closeAdminBtn"
+      >
+        Fechar
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- CARRINHO -->
+
+  <aside class="cartSidebar" id="cartSidebar">
+
+    <div class="cartHeader">
+
+      <h2>
+        Seu Carrinho
+      </h2>
+
+      <button
+        class="btn btn-dark"
+        onclick="toggleCart()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div class="cartBody" id="cartItems"></div>
+
+    <div class="cartFooter">
+
+      <div class="couponBox">
+
+        <input
+          type="text"
+          id="couponInput"
+          placeholder="Cupom de desconto"
+        >
+
+        <button
+          class="btn btn-primary"
+          onclick="applyCoupon()"
+        >
+          Aplicar
+        </button>
+
+      </div>
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          margin-bottom:8px;
+        "
+      >
+        <span>Subtotal</span>
+        <strong id="subtotalPrice">
+          R$ 0,00
+        </strong>
+      </div>
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          margin-bottom:8px;
+        "
+      >
+        <span>Desconto</span>
+        <strong id="discountPrice">
+          R$ 0,00
+        </strong>
+      </div>
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          font-size:22px;
+          margin-top:16px;
+        "
+      >
+        <strong>Total</strong>
+
+        <strong style="color:var(--accent)" id="cartTotal">
+          R$ 0,00
+        </strong>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        style="width:100%;margin-top:18px"
+        onclick="sendCartWhatsApp()"
+      >
+        Finalizar Pedido
+      </button>
+
+    </div>
+
+  </aside>
+
+  <!-- PREVIEW -->
+
+  <div
+    class="imagePreviewModal"
+    id="imagePreviewModal"
+    onclick="this.classList.remove('active')"
+  >
+    <img id="previewImage">
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="siteFooter">
+    <div class="siteFooter__inner">
+      <p>&copy; <span id="footerYear"></span> Kn2 Personalizados</p>
+      <div class="siteFooter__social">
+        <a
+          href="https://www.instagram.com/arteskn2?igsh=bmpsYW9kdHgzdzlp"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram @arteskn2"
+          class="siteFooter__socialLink"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <span>@arteskn2</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+
+    /* =========================
+       CONFIG
+    ========================= */
+
+    const SUPABASE_URL =
+      "https://kdoxzjdvpbdwpzyaqary.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
+
+    const _supabase =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const WHATSAPP_NUMBER =
+      "5531999683959";
+
+    /* =========================
+       STATE
+    ========================= */
+
+    let products = [];
+
+    let cart = JSON.parse(
+      localStorage.getItem("cart")
+    ) || [];
+
+    let activeCategory = "Todos";
+
+    const DEFAULT_CATEGORIES = ["Caneca","Botons","Caixas","Chaveiros"];
+
+    let customCategories = JSON.parse(
+      localStorage.getItem("customCategories")
+    ) || [];
+
+    function getAllCategories(){
+      const fromProducts = products
+        .map(p => p.category)
+        .filter(c => c && String(c).trim() !== "");
+      return Array.from(new Set([
+        ...DEFAULT_CATEGORIES,
+        ...customCategories,
+        ...fromProducts
+      ]));
+    }
+
+    function saveCustomCategories(){
+      localStorage.setItem(
+        "customCategories",
+        JSON.stringify(customCategories)
+      );
+    }
+
+    function refreshCategorySelect(selected){
+      const sel = document.getElementById("productCategory");
+      if(!sel) return;
+      const cats = getAllCategories();
+      sel.innerHTML = cats
+        .map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`)
+        .join("");
+      if(selected) sel.value = selected;
+    }
+
+    let searchQuery = "";
+
+    let discount = 0;
+
+    /* =========================
+       HELPERS
+    ========================= */
+
+    function formatBRL(value){
+      const n = Number(value) || 0;
+      return "R$ " + n.toFixed(2).replace('.', ',');
+    }
+
+    function escapeAttr(str){
+      return String(str ?? "")
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    /* =========================
+       INIT
+    ========================= */
+
+    async function init(){
+
+      await fetchProducts();
+
+      await checkUser();
+
+      renderMenu();
+
+      renderGrid();
+
+      updateCart();
+
+    }
+
+    /* =========================
+       PRODUCTS
+    ========================= */
+
+    async function fetchProducts(){
+
+      const { data, error } =
+        await _supabase
+          .from('produtos')
+          .select('*')
+          .order('created_at', {
+            ascending:false
+          });
+
+      if(!error){
+        products = data || [];
+      }
+
+    }
+
+    /* =========================
+       MENU
+    ========================= */
+
+    function renderMenu(){
+
+      const menuRow =
+        document.getElementById("menuRow");
+
+      menuRow.innerHTML = "";
+
+      const categories = [
+        "Todos",
+        ...getAllCategories()
+      ];
+
+      categories.forEach(cat => {
+
+        const btn =
+          document.createElement("button");
+
+        btn.className =
+          `menu__btn ${
+            cat === activeCategory
+            ? 'active'
+            : ''
+          }`;
+
+        btn.textContent = cat;
+
+        btn.onclick = () => {
+
+          activeCategory = cat;
+
+          renderMenu();
+
+          renderGrid();
+
+        };
+
+        menuRow.appendChild(btn);
+
+      });
+
+    }
+
+    /* =========================
+       GRID
+    ========================= */
+
+    function renderGrid(){
+
+      const container =
+        document.getElementById(
+          "catalogContainer"
+        );
+
+      container.innerHTML = "";
+
+      const filtered = products.filter(p => {
+
+        const matchCat =
+          activeCategory === "Todos" ||
+          p.category === activeCategory;
+
+        const title = String(p.title ?? "").toLowerCase();
+        const matchSearch =
+          title.includes(searchQuery.toLowerCase());
+
+        return matchCat && matchSearch;
+
+      });
+
+      document.getElementById(
+        "emptyState"
+      ).hidden = filtered.length > 0;
+
+      const grouped = {};
+
+      filtered.forEach(p => {
+
+        const cat = p.category || "Sem categoria";
+
+        if(!grouped[cat]){
+          grouped[cat] = [];
         }
 
-        function render() {
-            const container = document.getElementById('catalog');
-            container.innerHTML = prods.map(p => `
-                <div class="card">
-                    <img src="${p.image_url}" class="img">
-                    <div style="padding: 15px;">
-                        <h3 style="margin:0 0 10px 0">${p.title}</h3>
-                        <p style="color:var(--accent); font-size: 20px; font-weight: bold;">R$ ${p.price.toFixed(2)}</p>
-                        <button class="btn" onclick="comprar('${p.title}', ${p.price})">🛒 Pedir no Zap</button>
-                        <button onclick="curtir('${p.id}', ${p.likes || 0})" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">❤️ Curtir (${p.likes || 0})</button>
-                    </div>
+        grouped[cat].push(p);
+
+      });
+
+      for(const cat in grouped){
+
+        const section =
+          document.createElement("div");
+
+        section.className =
+          "categoryBlock";
+
+        section.innerHTML = `
+          <h2 class="categoryHeading">
+            ${escapeHtml(cat)}
+          </h2>
+        `;
+
+        const grid =
+          document.createElement("div");
+
+        grid.className = "productsGrid";
+
+        grouped[cat].forEach(p => {
+
+          const card =
+            document.createElement("div");
+
+          card.className = "card";
+
+          const safeId = escapeAttr(p.id);
+          const safeImg = escapeAttr(p.image_url);
+
+          card.innerHTML = `
+
+            <img
+              class="productImage"
+              src="${safeImg}"
+              loading="lazy"
+              onclick="showImg('${safeImg}')"
+              alt="${escapeAttr(p.title)}"
+            >
+
+            <div class="card__body">
+
+              <h3 class="card__title">
+                ${escapeHtml(p.title)}
+              </h3>
+
+              <div class="card__meta">
+
+                <span>
+                  ${escapeHtml(p.category)}
+                </span>
+
+                <span class="price">
+                  ${formatBRL(p.price)}
+                </span>
+
+              </div>
+
+              <button
+                class="btn btn-primary"
+                onclick="addToCart('${safeId}')"
+              >
+                Adicionar ao Carrinho
+              </button>
+
+            </div>
+
+          `;
+
+          grid.appendChild(card);
+
+        });
+
+        section.appendChild(grid);
+
+        container.appendChild(section);
+
+      }
+
+    }
+
+    /* =========================
+       CART
+    ========================= */
+
+    function addToCart(id){
+
+      const product =
+        products.find(p => p.id == id);
+
+      if(!product) return;
+
+      const existing =
+        cart.find(item => item.id == id);
+
+      if(existing){
+
+        existing.quantity++;
+
+      } else {
+
+        cart.push({
+          ...product,
+          price: Number(product.price) || 0,
+          quantity: 1
+        });
+
+      }
+
+      updateCart();
+
+    }
+
+    function increaseQty(id){
+
+      const item =
+        cart.find(i => i.id == id);
+
+      item.quantity++;
+
+      updateCart();
+
+    }
+
+    function decreaseQty(id){
+
+      const item =
+        cart.find(i => i.id == id);
+
+      item.quantity--;
+
+      if(item.quantity <= 0){
+
+        cart =
+          cart.filter(i => i.id != id);
+
+      }
+
+      updateCart();
+
+    }
+
+    function removeItem(id){
+
+      cart =
+        cart.filter(i => i.id != id);
+
+      updateCart();
+
+    }
+
+    function updateCart(){
+
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+      );
+
+      renderCart();
+
+      updateCartCount();
+
+    }
+
+    function updateCartCount(){
+
+      const totalItems =
+        cart.reduce(
+          (acc,item) =>
+            acc + item.quantity,
+          0
+        );
+
+      document.getElementById(
+        "cartCount"
+      ).textContent = totalItems;
+
+    }
+
+    function renderCart(){
+
+      const container =
+        document.getElementById(
+          "cartItems"
+        );
+
+      if(cart.length === 0){
+
+        container.innerHTML = `
+          <p style="
+            text-align:center;
+            color:gray;
+            margin-top:40px;
+          ">
+            Seu carrinho está vazio.
+          </p>
+        `;
+
+        document.getElementById(
+          "subtotalPrice"
+        ).textContent = "R$ 0,00";
+
+        document.getElementById(
+          "discountPrice"
+        ).textContent = "R$ 0,00";
+
+        document.getElementById(
+          "cartTotal"
+        ).textContent = "R$ 0,00";
+
+        return;
+
+      }
+
+      let subtotal = 0;
+
+      container.innerHTML =
+        cart.map(item => {
+
+          const total =
+            item.price * item.quantity;
+
+          subtotal += total;
+
+          const safeId = escapeAttr(item.id);
+
+          return `
+
+            <div class="cartItem">
+
+              <img src="${escapeAttr(item.image_url)}" alt="${escapeAttr(item.title)}">
+
+              <div class="cartItem__info">
+
+                <strong>
+                  ${escapeHtml(item.title)}
+                </strong>
+
+                <div style="
+                  margin-top:6px;
+                  color:var(--accent);
+                  font-weight:900;
+                ">
+                  ${formatBRL(total)}
                 </div>
-            `).join('');
+
+                <div class="qtyControls">
+
+                  <button
+                    class="qtyBtn"
+                    onclick="decreaseQty('${safeId}')"
+                  >
+                    -
+                  </button>
+
+                  <span>
+                    ${item.quantity}
+                  </span>
+
+                  <button
+                    class="qtyBtn"
+                    onclick="increaseQty('${safeId}')"
+                  >
+                    +
+                  </button>
+
+                </div>
+
+                <button
+                  class="removeBtn"
+                  onclick="removeItem('${safeId}')"
+                >
+                  Remover
+                </button>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }).join('');
+
+      const total =
+        Math.max(0, subtotal - discount);
+
+      document.getElementById(
+        "subtotalPrice"
+      ).textContent = formatBRL(subtotal);
+
+      document.getElementById(
+        "discountPrice"
+      ).textContent = formatBRL(discount);
+
+      document.getElementById(
+        "cartTotal"
+      ).textContent = formatBRL(total);
+
+    }
+
+    function toggleCart(forceOpen = false){
+
+      const sidebar =
+        document.getElementById(
+          "cartSidebar"
+        );
+
+      if(forceOpen){
+
+        sidebar.classList.add("active");
+
+      } else {
+
+        sidebar.classList.toggle("active");
+
+      }
+
+    }
+
+    function applyCoupon(){
+
+      const code =
+        document.getElementById(
+          "couponInput"
+        ).value
+        .trim()
+        .toUpperCase();
+
+      if(code === "KN210"){
+
+        discount = 10;
+
+        alert(
+          "Cupom aplicado: R$10 OFF"
+        );
+
+      } else {
+
+        discount = 0;
+
+        alert("Cupom inválido");
+
+      }
+
+      renderCart();
+
+    }
+
+    function sendCartWhatsApp(){
+
+      if(cart.length === 0){
+
+        return alert(
+          "Seu carrinho está vazio."
+        );
+
+      }
+
+      let subtotal = 0;
+
+      let message =
+        "Olá! Gostaria de fazer o pedido:%0A%0A";
+
+      cart.forEach(item => {
+
+        const total =
+          item.price * item.quantity;
+
+        subtotal += total;
+
+        message +=
+          `• ${item.title}` +
+          ` | Qtd: ${item.quantity}` +
+          ` | ${formatBRL(total)}%0A`;
+
+      });
+
+      const final =
+        Math.max(0, subtotal - discount);
+
+      message +=
+        `%0ASubtotal: ${formatBRL(subtotal)}`;
+
+      message +=
+        `%0ADesconto: ${formatBRL(discount)}`;
+
+      message +=
+        `%0A%0ATotal: ${formatBRL(final)}`;
+
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
+        '_blank'
+      );
+
+    }
+
+    /* =========================
+       IMAGE PREVIEW
+    ========================= */
+
+    function showImg(url){
+
+      document.getElementById(
+        "previewImage"
+      ).src = url;
+
+      document.getElementById(
+        "imagePreviewModal"
+      ).classList.add("active");
+
+    }
+
+    /* =========================
+       ADMIN
+    ========================= */
+
+    async function openAdminPanel(){
+
+      resetProductForm();
+
+      document.getElementById(
+        "adminModal"
+      ).classList.add("active");
+
+      renderAdminList();
+
+    }
+
+    function renderAdminList(){
+
+      const list =
+        document.getElementById(
+          "adminList"
+        );
+
+      list.innerHTML =
+        products.map(p => {
+          const safeId = escapeAttr(p.id);
+          return `
+
+          <div class="adminItem">
+
+            <img src="${escapeAttr(p.image_url)}" alt="${escapeAttr(p.title)}">
+
+            <div class="adminItem__info">
+
+              <strong>
+                ${escapeHtml(p.title)}
+              </strong>
+
+              <br>
+
+              ${formatBRL(p.price)}
+
+            </div>
+
+            <div class="adminActions">
+
+              <button
+                class="btn btn-primary"
+                onclick="editProduct('${safeId}')"
+              >
+                Editar
+              </button>
+
+              <button
+                class="btn btn-danger"
+                onclick="deleteProd('${safeId}')"
+              >
+                Excluir
+              </button>
+
+            </div>
+
+          </div>
+
+        `;
+        }).join('');
+
+    }
+
+    function resetProductForm(){
+      document.getElementById("editingId").value = "";
+      document.getElementById("productTitle").value = "";
+      refreshCategorySelect(DEFAULT_CATEGORIES[0]);
+      document.getElementById("productPrice").value = "";
+      document.getElementById("productImage").value = "";
+    }
+
+    function editProduct(id){
+
+      const p =
+        products.find(x => x.id == id);
+
+      if(!p) return;
+
+      document.getElementById(
+        "editingId"
+      ).value = p.id;
+
+      document.getElementById(
+        "productTitle"
+      ).value = p.title ?? "";
+
+      const cat = p.category ?? DEFAULT_CATEGORIES[0];
+      if(cat && !getAllCategories().includes(cat)){
+        customCategories.push(cat);
+        saveCustomCategories();
+      }
+      refreshCategorySelect(cat);
+
+      document.getElementById(
+        "productPrice"
+      ).value = p.price ?? "";
+
+      // limpa o file input (imagem é opcional ao editar)
+      document.getElementById(
+        "productImage"
+      ).value = "";
+
+      document.querySelector(
+        "#adminModal .modal__content"
+      ).scrollTo({ top: 0, behavior: 'smooth' });
+
+    }
+
+    async function compressImage(file){
+
+      return new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+
+        reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
+
+        reader.onload = e => {
+
+          const img = new Image();
+
+          img.onerror = () => reject(new Error("Imagem inválida"));
+
+          img.onload = () => {
+
+            const canvas =
+              document.createElement('canvas');
+
+            const MAX = 1200;
+
+            let width = img.width;
+            let height = img.height;
+
+            if(width > height){
+
+              if(width > MAX){
+
+                height *= MAX / width;
+                width = MAX;
+
+              }
+
+            } else {
+
+              if(height > MAX){
+
+                width *= MAX / height;
+                height = MAX;
+
+              }
+
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx =
+              canvas.getContext('2d');
+
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              width,
+              height
+            );
+
+            canvas.toBlob(blob => {
+
+              if(!blob) return reject(new Error("Falha ao comprimir"));
+              resolve(blob);
+
+            }, 'image/jpeg', 0.75);
+
+          };
+
+          img.src = e.target.result;
+
+        };
+
+        reader.readAsDataURL(file);
+
+      });
+
+    }
+
+    document.getElementById("addCategoryBtn").onclick = () => {
+      const name = prompt("Nome da nova categoria:");
+      if(!name) return;
+      const clean = name.trim();
+      if(!clean) return;
+      if(!getAllCategories().includes(clean)){
+        customCategories.push(clean);
+        saveCustomCategories();
+      }
+      refreshCategorySelect(clean);
+      renderMenu();
+    };
+
+    document.getElementById(
+      "saveProductBtn"
+    ).onclick = async () => {
+
+      const id =
+        document.getElementById(
+          "editingId"
+        ).value;
+
+      const title =
+        document.getElementById(
+          "productTitle"
+        ).value.trim();
+
+      const category =
+        document.getElementById(
+          "productCategory"
+        ).value.trim();
+
+      const priceRaw =
+        document.getElementById(
+          "productPrice"
+        ).value;
+
+      const price = parseFloat(priceRaw);
+
+      const imageInput =
+        document.getElementById(
+          "productImage"
+        );
+
+      if(!title || !category || isNaN(price) || price < 0){
+        return alert("Preencha nome, categoria e preço válido.");
+      }
+
+      // Ao criar (sem id), imagem é obrigatória
+      if(!id && !imageInput.files[0]){
+        return alert("Selecione uma imagem para o produto.");
+      }
+
+      let image_url = null;
+
+      try {
+
+        if(imageInput.files[0]){
+
+          const compressed =
+            await compressImage(
+              imageInput.files[0]
+            );
+
+          const fileName =
+            Date.now() + ".jpg";
+
+          const filePath =
+            `produtos/${fileName}`;
+
+          const { error:uploadError } =
+            await _supabase
+              .storage
+              .from('imagens-produtos')
+              .upload(
+                filePath,
+                compressed
+              );
+
+          if(uploadError)
+            throw uploadError;
+
+          const {
+            data:{ publicUrl }
+          } =
+            _supabase
+              .storage
+              .from('imagens-produtos')
+              .getPublicUrl(filePath);
+
+          image_url = publicUrl;
+
         }
 
-        window.comprar = (nome, preco) => {
-            const msg = encodeURIComponent(`Olá! Quero pedir: ${nome} (R$ ${preco.toFixed(2)})`);
-            window.open(`https://wa.me/5531999683959?text=${msg}`);
-        };
+        if(id){
 
-        window.curtir = async (id, atual) => {
-            await _supabase.from('produtos').update({ likes: atual + 1 }).eq('id', id);
-            carregar(); // Recarrega só para atualizar o número
-        };
+          const payload = {
+            title,
+            category,
+            price:parseFloat(price)
+          };
 
-        carregar();
-    </script>
+          if(image_url){
+            payload.image_url = image_url;
+          }
+
+          const { error } =
+            await _supabase
+              .from('produtos')
+              .update(payload)
+              .eq('id', id);
+
+          if(error) throw error;
+
+          alert("Produto atualizado!");
+
+        } else {
+
+          const { error } =
+            await _supabase
+              .from('produtos')
+              .insert([{
+                title,
+                category,
+                price:parseFloat(price),
+                image_url
+              }]);
+
+          if(error) throw error;
+
+          alert("Produto criado!");
+
+        }
+
+        location.reload();
+
+      } catch(err){
+
+        alert(
+          "Erro: " + err.message
+        );
+
+      }
+
+    };
+
+    async function deleteProd(id){
+
+      if(!confirm(
+        "Excluir produto?"
+      )) return;
+
+      const { error } =
+        await _supabase
+          .from('produtos')
+          .delete()
+          .eq('id', id);
+
+      if(!error){
+
+        alert("Excluído");
+
+        location.reload();
+
+      }
+
+    }
+
+    /* =========================
+       AUTH
+    ========================= */
+
+    document.getElementById(
+      "loginBtn"
+    ).onclick = async () => {
+
+      const email =
+        document.getElementById(
+          "adminEmail"
+        ).value;
+
+      const password =
+        document.getElementById(
+          "adminPassword"
+        ).value;
+
+      const { error } =
+        await _supabase.auth
+          .signInWithPassword({
+            email,
+            password
+          });
+
+      if(error){
+
+        alert(error.message);
+
+      } else {
+
+        document.getElementById(
+          "loginModal"
+        ).classList.remove("active");
+
+        checkUser();
+
+        openAdminPanel();
+
+      }
+
+    };
+
+    async function checkUser(){
+
+      const {
+        data:{ user }
+      } =
+        await _supabase.auth.getUser();
+
+      if(user){
+
+        document.getElementById(
+          "logoutBtn"
+        ).style.display = "block";
+
+      }
+
+    }
+
+    document.getElementById(
+      "logoutBtn"
+    ).onclick = async () => {
+
+      await _supabase.auth.signOut();
+
+      location.reload();
+
+    };
+
+    document.getElementById(
+      "openAdminBtn"
+    ).onclick = async () => {
+
+      const {
+        data:{ user }
+      } =
+        await _supabase.auth.getUser();
+
+      if(user){
+
+        openAdminPanel();
+
+      } else {
+
+        document.getElementById(
+          "loginModal"
+        ).classList.add("active");
+
+      }
+
+    };
+
+    /* =========================
+       CLOSE MODALS
+    ========================= */
+
+    document.getElementById(
+      "closeLoginBtn"
+    ).onclick = () => {
+
+      document.getElementById(
+        "loginModal"
+      ).classList.remove("active");
+
+    };
+
+    document.getElementById(
+      "closeAdminBtn"
+    ).onclick = () => {
+
+      document.getElementById(
+        "adminModal"
+      ).classList.remove("active");
+
+    };
+
+    document.getElementById(
+      "searchInput"
+    ).oninput = e => {
+
+      searchQuery = e.target.value;
+
+      renderGrid();
+
+    };
+
+    /* =========================
+       START
+    ========================= */
+
+    init();
+
+    document.getElementById("footerYear").textContent =
+      new Date().getFullYear();
+
+  </script>
+
 </body>
 </html>
