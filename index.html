@@ -3,144 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kn2 Personalizados | Catálogo Oficial</title>
+    <title>Kn2 Personalizados | Catálogo</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #0b0f17; --card: #111827; --accent: #22c55e; --text: #f3f4f6; --border: rgba(255,255,255,.08); }
-        body { background: var(--bg); color: var(--text); font-family: system-ui; margin: 0; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui; margin: 0; overflow-x: hidden; }
         .container { width: min(1200px, 94vw); margin: auto; padding: 20px 0; }
-        
-        /* HEADER */
-        .topbar { sticky; top: 0; background: rgba(11,15,23,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 15px 0; z-index: 100; }
+        .topbar { position: sticky; top: 0; background: rgba(11,15,23,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 15px 0; z-index: 100; }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* GRID */
-        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: .3s; }
-        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .productImage { width: 100%; height: 250px; object-fit: cover; cursor: pointer; }
-        
-        /* BADGES */
-        .like-btn { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; border: 1px solid var(--border); }
-        
-        /* BUTTONS */
-        .btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: .2s; }
-        .btn-primary { background: var(--accent); color: #000; width: 100%; }
-        .btn-dark { background: #1f2937; color: white; }
-        
-        /* MODAL */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 500px; }
+        .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: .3s; display: flex; flex-direction: column; }
+        .productImage { width: 100%; height: 260px; object-fit: cover; cursor: pointer; }
+        .price { color: var(--accent); font-size: 22px; font-weight: 900; margin: 10px 0; }
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: .2s; width: 100%; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .like-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 15px; cursor: pointer; backdrop-filter: blur(5px); z-index: 10; }
     </style>
 </head>
 <body>
 
     <header class="topbar">
         <div class="container header-content">
-            <div style="font-size: 22px; font-weight: 900;">Kn2<span>.Artes</span></div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-dark" id="adminBtn">Painel</button>
-                <button class="btn btn-primary" onclick="alert('Seu pedido será enviado via WhatsApp no final!')" style="width: auto;">🛒 <span id="cartCount">0</span></button>
-            </div>
+            <div style="font-size: 24px; font-weight: 900;">Kn2 <span>Artes</span></div>
+            <button class="btn btn-primary" style="width: auto;">🛒 Itens: <span id="cartCount">0</span></button>
         </div>
     </header>
 
     <main class="container">
-        <div id="catalogContainer" class="productsGrid"></div>
+        <div id="catalogContainer" class="productsGrid">Carregando produtos...</div>
     </main>
 
-    <footer style="text-align: center; padding: 30px; opacity: 0.6; font-size: 12px;">
-        Visitas: <span id="visitCount">0</span> | Kn2 Personalizados © 2024
+    <footer style="text-align: center; padding: 40px; opacity: 0.5; font-size: 12px;">
+        Kn2 © 2024 | Visitas: <span id="visitCount">0</span>
     </footer>
 
-    <script>
+       <script>
      const SUPABASE_URL = "https://kdoxzjdvpbdwpzyaqary.supabase.co";
     const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
         let products = [];
-        let cartCount = 0;
+        let count = 0;
 
-        // Inicia o site de forma protegida
         async function init() {
             try {
-                await loadProducts();
+                // Carrega produtos primeiro
+                const { data, error } = await _supabase.from('produtos').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                products = data || [];
                 renderGrid();
-                updateVisits(); // Se falhar, o try/catch protege o resto
+                
+                // Tenta carregar visitas de forma isolada (se falhar, o site não trava)
+                updateVisits();
             } catch (err) {
-                console.error("Erro na inicialização:", err);
+                console.error("Erro crítico:", err);
+                document.getElementById('catalogContainer').innerHTML = "Erro ao carregar dados do banco.";
             }
-        }
-
-        async function loadProducts() {
-            const { data, error } = await _supabase.from('produtos').select('*').order('created_at', { ascending: false });
-            if (error) throw error;
-            products = data || [];
         }
 
         async function updateVisits() {
             try {
                 const { data } = await _supabase.from('estatisticas').select('visitas').eq('id', 1).single();
-                if (data) {
-                    const total = data.visitas + 1;
-                    await _supabase.from('estatisticas').update({ visitas: total }).eq('id', 1);
-                    document.getElementById('visitCount').innerText = total;
-                }
-            } catch (e) { console.warn("Contador de visitas offline"); }
+                if (data) document.getElementById('visitCount').innerText = data.visitas;
+            } catch (e) { console.log("Tabela de estatísticas não encontrada."); }
         }
 
         function renderGrid() {
             const container = document.getElementById('catalogContainer');
+            if (products.length === 0) { container.innerHTML = "Nenhum produto cadastrado."; return; }
+
             container.innerHTML = products.map(p => `
                 <div class="card">
-                    <div class="like-btn" onclick="handleLike('${p.id}', ${p.likes || 0})">❤️ ${p.likes || 0}</div>
+                    <div class="like-badge" onclick="handleLike('${p.id}', ${p.likes || 0})">❤️ ${p.likes || 0}</div>
                     <img src="${p.image_url}" class="productImage" onclick="window.open('${p.image_url}', '_blank')">
-                    <div style="padding: 15px;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 16px;">${p.title}</h3>
-                        <div style="color: var(--accent); font-size: 20px; font-weight: 900; margin-bottom: 15px;">
-                            R$ ${p.price.toFixed(2).replace('.', ',')}
-                        </div>
+                    <div style="padding: 15px; flex-grow: 1;">
+                        <h3 style="font-size: 16px; margin: 0;">${p.title}</h3>
+                        <div class="price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
                         <button class="btn btn-primary" onclick="addToCart('${p.id}')">Adicionar ao Pedido</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // FUNÇÃO DE LIKE CORRIGIDA
+        // --- FUNÇÕES GLOBAIS (BLINDADAS) ---
+        
         window.handleLike = async function(id, current) {
+            // Atualiza na tela imediatamente para ser rápido
+            const target = event.currentTarget;
+            target.innerText = `❤️ ${current + 1}`;
+            
             try {
-                const { error } = await _supabase.from('produtos').update({ likes: current + 1 }).eq('id', id);
-                if (!error) {
-                    products = products.map(p => p.id === id ? {...p, likes: current + 1} : p);
-                    renderGrid();
-                }
-            } catch (e) { alert("Erro ao curtir. Verifique a tabela no Supabase."); }
-        }
+                await _supabase.from('produtos').update({ likes: current + 1 }).eq('id', id);
+            } catch (e) { console.error("Erro ao salvar like"); }
+        };
 
-        // FUNÇÃO DE CARRINHO CORRIGIDA
         window.addToCart = function(id) {
-            cartCount++;
-            document.getElementById('cartCount').innerText = cartCount;
+            count++;
+            document.getElementById('cartCount').innerText = count;
+            
             const p = products.find(x => x.id === id);
-            
-            // Feedback visual simples
             const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "✅ Adicionado!";
-            btn.style.background = "#ffffff";
-            
+            btn.innerText = "✅ No Carrinho!";
+            btn.style.background = "#fff";
+
             setTimeout(() => {
-                btn.innerText = originalText;
+                btn.innerText = "Adicionar ao Pedido";
                 btn.style.background = "";
                 
-                if(confirm("Produto adicionado! Deseja finalizar o pedido no WhatsApp agora?")) {
+                if(confirm(`Deseja enviar o pedido de "${p.title}" agora via WhatsApp?`)) {
                     const msg = `Olá! Tenho interesse no produto: ${p.title} (R$ ${p.price.toFixed(2)})`;
                     window.open(`https://wa.me/5531999683959?text=${encodeURIComponent(msg)}`, '_blank');
                 }
-            }, 800);
-        }
+            }, 500);
+        };
 
         init();
     </script>
@@ -148,3 +124,10 @@
 </html>
 
 
+
+
+
+
+
+
+     
