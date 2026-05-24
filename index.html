@@ -6,139 +6,93 @@
   <title>Kn2 Catálogo | Oficial</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ESTILOS PRESERVADOS DO ARQUIVO ORIGINAL */
     :root {
       --bg: #0b0f17; --card: #111827; --text: #e5e7eb;
       --muted: #9ca3af; --border: rgba(255,255,255,.08);
       --accent: #22c55e; --danger: #ef4444;
     }
     * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui; }
-    body { background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
-    .container { width:min(1200px,92vw); margin:auto; flex:1; }
+    body { background:var(--bg); color:var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    .container { width:min(1200px,92vw); margin:auto; flex: 1; }
 
-    /* TOPBAR E LOGO */
-    .topbar { position:sticky; top:0; z-index:1000; backdrop-filter:blur(10px); background:rgba(11,15,23,.9); border-bottom:1px solid var(--border); }
-    .topbar__inner { padding:16px 0; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .hero { text-align:center; padding:20px 0; }
-    #mainLogo { max-width:200px; border-radius:15px; display:none; margin: 0 auto; }
-    .logo-text { font-size:28px; font-weight:900; color:var(--accent); }
+    /* HEADER */
+    .topbar { position:sticky; top:0; z-index:1000; backdrop-filter:blur(10px); background:rgba(11,15,23,.9); border-bottom:1px solid var(--border); padding:16px 0; }
+    .topbar__inner { display:flex; align-items:center; justify-content:space-between; }
+    .logo-area img { max-width:180px; border-radius:10px; display:none; }
+    .logo-text { font-size:24px; font-weight:900; color:var(--accent); }
 
     /* BOTÕES */
-    .btn { border:none; cursor:pointer; border-radius:12px; padding:12px 16px; color:white; font-weight:700; transition:.2s; display:inline-flex; align-items:center; gap:8px; text-decoration:none; }
+    .btn { border:none; cursor:pointer; border-radius:12px; padding:10px 16px; color:white; font-weight:700; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
     .btn-primary { background:var(--accent); }
     .btn-dark { background:#1f2937; }
-    .btn-danger { background:var(--danger); }
 
-    /* GRID E CARDS */
+    /* GRID & CARDS */
     .categoryBlock { margin-bottom:40px; }
     .categoryHeading { margin-bottom:18px; border-bottom:1px solid var(--border); padding-bottom:10px; font-size:22px; }
     .productsGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
-    .card { background:var(--card); border-radius:18px; overflow:hidden; border:1px solid var(--border); transition:.25s; display:flex; flex-direction:column; }
-    .productImage { width:100%; height:240px; object-fit:cover; cursor:zoom-in; }
-    .card__body { padding:16px; flex:1; display:flex; flex-direction:column; }
-    .price { color:var(--accent); font-size:20px; font-weight:900; }
+    .card { background:var(--card); border-radius:18px; overflow:hidden; border:1px solid var(--border); display:flex; flex-direction:column; }
+    .productImage { width:100%; height:240px; object-fit:cover; }
+    .card__body { padding:16px; flex:1; }
 
-    /* CARRINHO */
-    .cartSidebar { position:fixed; top:0; right:-420px; width:420px; max-width:100%; height:100vh; background:#111827; z-index:99999; border-left:1px solid var(--border); transition:.3s; display:flex; flex-direction:column; }
-    .cartSidebar.active { right:0; }
-    .cartBody { flex:1; overflow:auto; padding:20px; }
-    .cartItem { display:flex; gap:12px; background:#0f172a; padding:12px; border-radius:14px; margin-bottom:12px; }
-    .cartItem img { width:60px; height:60px; border-radius:8px; object-fit:cover; }
-
-    /* MODAL */
-    .modal { position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(4px); }
+    /* FOOTER (Restaurado) */
+    .siteFooter { margin-top:48px; padding:24px 16px; border-top:1px solid var(--border); background:#0b0f17; }
+    .siteFooter__inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:14px; }
+    
+    /* MODAIS */
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px); }
     .modal.active { display:flex; }
-    .modal__content { width:min(700px,92vw); max-height:90vh; overflow:auto; background:#111827; border-radius:20px; padding:24px; border:1px solid var(--border); }
-    input, select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:#0f172a; color:white; margin-top:5px; }
-
-    /* FOOTER */
-    .siteFooter { margin-top:50px; padding:24px; border-top:1px solid var(--border); text-align:center; color:var(--muted); }
+    .modal__content { width:min(600px,92vw); background:#111827; border-radius:20px; padding:24px; border:1px solid var(--border); }
+    input, select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:#0f172a; color:white; margin-top:8px; }
   </style>
 </head>
 <body>
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <div class="logo-text" id="logoPlaceholder">Kn2 Catálogo</div>
+      <div class="logo-area" id="logoContainer">
+        <span class="logo-text">Kn2 Catálogo</span>
+        <img src="" id="siteLogo">
+      </div>
       <div style="display:flex; gap:10px">
-        <button class="btn btn-primary" onclick="toggleCart()">🛒 <span id="cartCount">0</span></button>
-        <button class="btn btn-dark" id="openAdminBtn">Painel Admin</button>
-        <button class="btn btn-danger" id="logoutBtn" style="display:none">Sair</button>
+        <button class="btn btn-dark" id="adminControlBtn">Painel Admin</button>
+        <button class="btn btn-dark" id="logoutBtn" style="display:none" onclick="handleLogout()">Sair</button>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <img src="" id="mainLogo" alt="Logo">
-    </section>
-
-    <div id="menuRow" style="display:flex; gap:10px; overflow-x:auto; padding:20px 0;"></div>
-
-    <input type="text" id="searchInput" placeholder="Pesquisar produto..." style="width:100%; padding:15px; border-radius:14px; border:1px solid var(--border); background:#111827; color:white; margin-bottom:30px">
-
+    <div id="menuRow" style="display:flex; gap:10px; overflow-x:auto; padding:20px 0"></div>
+    <input type="text" id="searchInput" placeholder="Pesquisar produto..." oninput="handleSearch(this.value)" style="margin-bottom:20px; width:100%; padding:15px; border-radius:10px; background:#111827; border:1px solid var(--border); color:white">
     <div id="catalogContainer"></div>
   </main>
 
-  <aside class="cartSidebar" id="cartSidebar">
-    <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between">
-      <h2>Seu Carrinho</h2>
-      <button class="btn" onclick="toggleCart()">✕</button>
-    </div>
-    <div class="cartBody" id="cartItems"></div>
-    <div style="padding:20px; border-top:1px solid var(--border)">
-      <div style="display:flex; gap:10px; margin-bottom:15px">
-        <input type="text" id="couponInput" placeholder="Cupom (Ex: KN210)">
-        <button class="btn btn-primary" onclick="applyCoupon()">Aplicar</button>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>Subtotal:</span> <span id="subtotalPrice">R$ 0,00</span></div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--danger)"><span>Desconto:</span> <span id="discountPrice">R$ 0,00</span></div>
-      <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:900"><span>Total:</span> <span id="cartTotal" style="color:var(--accent)">R$ 0,00</span></div>
-      <button class="btn btn-primary" style="width:100%; margin-top:15px; justify-content:center" onclick="sendCartWhatsApp()">Finalizar no WhatsApp</button>
-    </div>
-  </aside>
-
   <div class="modal" id="loginModal">
     <div class="modal__content">
-      <h2 style="margin-bottom:20px">Acesso Administrativo</h2>
-      <input type="email" id="adminEmail" placeholder="E-mail">
-      <input type="password" id="adminPassword" placeholder="Senha">
-      <button class="btn btn-primary" style="width:100%; margin-top:20px" id="loginBtn">Entrar</button>
-      <button class="btn btn-dark" style="width:100%; margin-top:10px" onclick="closeModal('loginModal')">Fechar</button>
+      <h2>Acesso Restrito</h2>
+      <input type="email" id="email" placeholder="E-mail">
+      <input type="password" id="password" placeholder="Senha">
+      <button class="btn btn-primary" style="width:100%; margin-top:20px; justify-content:center" onclick="handleLogin()">Entrar</button>
+      <button class="btn btn-dark" style="width:100%; margin-top:10px; justify-content:center" onclick="closeModal('loginModal')">Cancelar</button>
     </div>
   </div>
 
   <div class="modal" id="adminModal">
     <div class="modal__content">
       <h2>Gestão do Catálogo</h2>
-      
-      <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin:20px 0; border:1px solid var(--border)">
-        <h4 style="color:var(--accent)">🎨 Identidade do Site</h4>
-        <label>Trocar Logo do Topo</label>
-        <input type="file" id="logoUpload" accept="image/*">
-        <button class="btn btn-primary" style="width:100%; margin-top:10px" id="btnUpdateLogo">Salvar Logo</button>
+      <div style="margin:20px 0; padding:15px; background:rgba(255,255,255,0.02); border-radius:10px">
+        <label>Trocar Logo do Site</label>
+        <input type="file" id="logoInput" accept="image/*">
+        <button class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center" onclick="uploadLogo()">Salvar Logo</button>
       </div>
-
-      <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid var(--border)">
-        <h4>📦 Novo Produto</h4>
-        <input type="hidden" id="editingId">
-        <input type="text" id="pTitle" placeholder="Nome">
-        <div style="display:flex; gap:10px; margin-top:10px">
-          <select id="pCat"></select>
-          <button class="btn btn-dark" id="addCategoryBtn">+</button>
-        </div>
-        <input type="number" id="pPrice" placeholder="Preço" step="0.01">
-        <input type="file" id="pImage" accept="image/*">
-        <button class="btn btn-primary" style="width:100%; margin-top:15px" id="saveProductBtn">Salvar Produto</button>
-      </div>
-
-      <div id="adminList" style="margin-top:20px"></div>
-      <button class="btn btn-dark" style="width:100%; margin-top:15px" onclick="closeModal('adminModal')">Fechar Painel</button>
+      <button class="btn btn-dark" style="width:100%" onclick="closeModal('adminModal')">Fechar</button>
     </div>
   </div>
 
   <footer class="siteFooter">
-    <p>&copy; <span id="footerYear"></span> Kn2 Personalizados | <a href="https://instagram.com/arteskn2" style="color:var(--accent); text-decoration:none">@arteskn2</a></p>
+    <div class="siteFooter__inner">
+      <p>&copy; <span id="footerYear"></span> Kn2 Personalizados</p>
+      <a href="https://instagram.com/arteskn2" target="_blank" style="color:var(--accent); text-decoration:none">@arteskn2</a>
+    </div>
   </footer>
 
   <script>
@@ -146,147 +100,81 @@
     const SUPABASE_KEY = "sb_publishable_4WrcBi_Cy8yRg8v0D3_BQw_1XuBID4V";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let products = [], cart = JSON.parse(localStorage.getItem("cart")) || [], activeCategory = "Todos", discount = 0;
-    const DEFAULT_CATS = ["Caneca","Botons","Caixas","Chaveiros"];
-    let customCats = JSON.parse(localStorage.getItem("customCats")) || [];
+    let products = [], activeCat = "Todos", searchQuery = "";
 
     async function init() {
       document.getElementById('footerYear').textContent = new Date().getFullYear();
       await loadLogo();
       await fetchProducts();
-      await checkUser();
-      renderMenu();
-      renderGrid();
-      updateCart();
+      checkUserStatus();
     }
 
+    // CARREGAR LOGO DINÂMICA
     async function loadLogo() {
       const { data } = await _supabase.from('configuracoes_site').select('logo_url').eq('id', 'config_geral').single();
       if (data && data.logo_url) {
-        const img = document.getElementById('mainLogo');
+        const img = document.getElementById('siteLogo');
         img.src = data.logo_url;
         img.style.display = 'block';
-        document.getElementById('logoPlaceholder').style.display = 'none';
+        document.querySelector('.logo-text').style.display = 'none';
       }
     }
+
+    // BLOQUEIO DE SEGURANÇA NO ADMIN
+    document.getElementById('adminControlBtn').onclick = async () => {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (user) {
+        document.getElementById('adminModal').classList.add('active');
+      } else {
+        document.getElementById('loginModal').classList.add('active');
+      }
+    };
+
+    async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { error } = await _supabase.auth.signInWithPassword({ email, password });
+      if (error) alert("Erro: " + error.message); else location.reload();
+    }
+
+    async function checkUserStatus() {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (user) document.getElementById('logoutBtn').style.display = 'block';
+    }
+
+    async function handleLogout() { await _supabase.auth.signOut(); location.reload(); }
 
     async function fetchProducts() {
       const { data } = await _supabase.from('produtos').select('*').order('category');
       products = data || [];
-      updateCatSelect();
+      renderGrid();
     }
-
-    function updateCatSelect() {
-      const all = Array.from(new Set([...DEFAULT_CATS, ...customCats, ...products.map(p => p.category)]));
-      document.getElementById('pCat').innerHTML = all.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
-
-    function renderMenu() {
-      const cats = ["Todos", ...new Set([...DEFAULT_CATS, ...customCats, ...products.map(p => p.category)])];
-      document.getElementById('menuRow').innerHTML = cats.map(c => `
-        <button class="btn ${c === activeCategory ? 'btn-primary' : 'btn-dark'}" onclick="setCat('${c}')">${c}</button>
-      `).join('');
-    }
-
-    window.setCat = (c) => { activeCategory = c; renderMenu(); renderGrid(); };
 
     function renderGrid() {
-      const container = document.getElementById("catalogContainer");
+      const container = document.getElementById('catalogContainer');
       container.innerHTML = "";
-      const filtered = products.filter(p => activeCategory === "Todos" || p.category === activeCategory);
+      const filtered = products.filter(p => (activeCat === "Todos" || p.category === activeCat) && p.title.toLowerCase().includes(searchQuery.toLowerCase()));
       
       const grouped = filtered.reduce((acc, p) => { (acc[p.category] = acc[p.category] || []).push(p); return acc; }, {});
 
       for (const cat in grouped) {
-        container.innerHTML += `<div class="categoryBlock"><h2 class="categoryHeading">${cat}</h2><div class="productsGrid">
-          ${grouped[cat].map(p => `<div class="card">
-            <img src="${p.image_url}" class="productImage" onclick="window.open('${p.image_url}')">
-            <div class="card__body">
-              <strong>${p.title}</strong>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:10px">
-                <span class="price">R$ ${p.price.toFixed(2)}</span>
-                <button class="btn btn-primary" onclick="addToCart('${p.id}')">🛒</button>
+        container.innerHTML += `<div class="categoryBlock">
+          <h2 class="categoryHeading">${cat}</h2>
+          <div class="productsGrid">${grouped[cat].map(p => `
+            <div class="card">
+              <img src="${p.image_url}" class="productImage">
+              <div class="card__body">
+                <strong>${p.title}</strong><br>
+                <span style="color:var(--accent); font-weight:900">R$ ${(Number(p.price) || 0).toFixed(2)}</span>
               </div>
-            </div>
-          </div>`).join('')}
-        </div></div>`;
+            </div>`).join('')}
+          </div>
+        </div>`;
       }
     }
 
-    // CARRINHO E WHATSAPP
-    function addToCart(id) {
-      const p = products.find(x => x.id == id);
-      const exists = cart.find(i => i.id == id);
-      if (exists) exists.quantity++; else cart.push({...p, quantity: 1});
-      updateCart();
-      toggleCart(true);
-    }
-
-    function updateCart() {
-      localStorage.setItem("cart", JSON.stringify(cart));
-      document.getElementById("cartCount").textContent = cart.reduce((a, b) => a + b.quantity, 0);
-      let subtotal = 0;
-      document.getElementById("cartItems").innerHTML = cart.map(i => {
-        subtotal += i.price * i.quantity;
-        return `<div class="cartItem"><img src="${i.image_url}"><div><strong>${i.title}</strong><br><span>${i.quantity}x R$ ${i.price.toFixed(2)}</span><br><button onclick="remCart('${i.id}')" style="color:red; background:none; border:none; cursor:pointer">Remover</button></div></div>`;
-      }).join('');
-      document.getElementById("subtotalPrice").textContent = `R$ ${subtotal.toFixed(2)}`;
-      document.getElementById("discountPrice").textContent = `R$ ${discount.toFixed(2)}`;
-      document.getElementById("cartTotal").textContent = `R$ ${(subtotal - discount).toFixed(2)}`;
-    }
-
-    window.remCart = (id) => { cart = cart.filter(i => i.id != id); updateCart(); };
-    function applyCoupon() { if(document.getElementById("couponInput").value.toUpperCase() === "KN210") { discount = 10; alert("Cupom Aplicado!"); updateCart(); } }
-
-    function sendCartWhatsApp() {
-      let msg = "Olá Kn2! Gostaria de fazer esse pedido:%0A%0A";
-      cart.forEach(i => msg += `• ${i.title} (x${i.quantity})%0A`);
-      msg += `%0A*Total: ${document.getElementById("cartTotal").textContent}*`;
-      window.open(`https://wa.me/5531999683959?text=${msg}`);
-    }
-
-    // ADMIN E SEGURANÇA
-    document.getElementById('openAdminBtn').onclick = async () => {
-      const { data: { user } } = await _supabase.auth.getUser();
-      if (user) document.getElementById('adminModal').classList.add('active');
-      else document.getElementById('loginModal').classList.add('active');
-    };
-
-    document.getElementById('loginBtn').onclick = async () => {
-      const { error } = await _supabase.auth.signInWithPassword({
-        email: document.getElementById('adminEmail').value,
-        password: document.getElementById('adminPassword').value
-      });
-      if (error) alert("Erro: " + error.message); else location.reload();
-    };
-
-    document.getElementById('logoutBtn').onclick = async () => { await _supabase.auth.signOut(); location.reload(); };
-
-    async function checkUser() { 
-      const { data: { user } } = await _supabase.auth.getUser(); 
-      if(user) document.getElementById("logoutBtn").style.display = "block"; 
-    }
-
-    // UPDATE LOGO
-    document.getElementById('btnUpdateLogo').onclick = async () => {
-      const file = document.getElementById('logoUpload').files[0];
-      if (!file) return;
-      const path = `sistema/logo_${Date.now()}.jpg`;
-      const { error } = await _supabase.storage.from('imagens-produtos').upload(path, file);
-      if(!error) {
-        const { data: { publicUrl } } = _supabase.storage.from('imagens-produtos').getPublicUrl(path);
-        await _supabase.from('configuracoes_site').update({ logo_url: publicUrl }).eq('id', 'config_geral');
-        alert("Logo atualizada!"); location.reload();
-      }
-    };
-
-    window.toggleCart = (open = false) => document.getElementById("cartSidebar").classList.toggle("active", open);
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-    
-    document.getElementById('addCategoryBtn').onclick = () => {
-      const n = prompt("Nova Categoria:");
-      if(n) { customCats.push(n); localStorage.setItem("customCats", JSON.stringify(customCats)); updateCatSelect(); renderMenu(); }
-    };
+    window.handleSearch = (v) => { searchQuery = v; renderGrid(); };
 
     init();
   </script>
