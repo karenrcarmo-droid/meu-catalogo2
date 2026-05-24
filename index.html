@@ -466,7 +466,7 @@
         <div class="f-group">
             <label>Imagem (Upload local ou URL)</label>
             <input type="file" id="pImageFile" accept="image/*" style="margin-bottom: 8px;">
-            <input type="text" id="pImg" placeholder="Link da imagem se não for upload">
+            <input type="text" id="pImg" placeholder="Link da imagem se não houver upload">
         </div>
 
         <div style="display:flex; gap:10px">
@@ -556,17 +556,7 @@ let activeCat = "Todos";
 let query = "";
 let categories = [];
 
-async function init() {
-    await loadData();
-    await checkSession();
-
-    updateCartUI();
-
-    document.getElementById('year').textContent = new Date().getFullYear();
-    setupPriceMask();
-}
-
-// MÁSCARA DE PREÇO (Melhoria 5)
+// Melhoria 5: Máscara de Moeda
 function setupPriceMask() {
     const input = document.getElementById('pPrice');
     input.addEventListener('input', (e) => {
@@ -578,7 +568,7 @@ function setupPriceMask() {
     });
 }
 
-// OTIMIZAÇÃO DE IMAGEM (Melhoria 4)
+// Melhoria 4: Otimização de Imagem
 async function compressImage(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -592,19 +582,23 @@ async function compressImage(file) {
                 const scaleSize = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scaleSize;
-
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.8);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8);
             };
         };
     });
 }
 
-async function loadData() {
+async function init() {
+    await loadData();
+    await checkSession();
+    updateCartUI();
+    setupPriceMask();
+    document.getElementById('year').textContent = new Date().getFullYear();
+}
 
+async function loadData() {
     const { data, error } = await _supabase
         .from('produtos')
         .select('*')
@@ -616,390 +610,177 @@ async function loadData() {
     }
 
     products = data || [];
-
-    categories = [
-        ...new Set(
-            products
-            .map(p => p.category)
-            .filter(Boolean)
-        )
-    ];
-
+    categories = [...new Set(products.map(p => p.category).filter(Boolean))];
     updateCatSelect();
-
     if(activeCat !== "Todos" && !categories.includes(activeCat)){
         activeCat = "Todos";
     }
-
     render();
 }
 
 function render(){
-
     const cats = ["Todos", ...new Set(categories)];
-
     document.getElementById('filterRow').innerHTML =
         cats.map(c => `
-            <button
-                class="filter-btn ${c === activeCat ? 'active' : ''}"
-                onclick="setCat('${c}')"
-            >
-                ${c}
-            </button>
+            <button class="filter-btn ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>
         `).join('');
 
-    let filtered = products.filter(p =>
-        p.title.toLowerCase().includes(query.toLowerCase())
-    );
-
-    if(activeCat !== "Todos"){
-        filtered = filtered.filter(p => p.category === activeCat);
-    }
+    let filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()));
+    if(activeCat !== "Todos") filtered = filtered.filter(p => p.category === activeCat);
 
     const grouped = filtered.reduce((acc, p) => {
-
-        if(!acc[p.category]){
-            acc[p.category] = [];
-        }
-
+        if(!acc[p.category]) acc[p.category] = [];
         acc[p.category].push(p);
-
         return acc;
-
     }, {});
 
     if(filtered.length === 0){
-
-        document.getElementById('catalog').innerHTML = `
-            <div style="text-align:center;padding:50px;color:var(--muted)">
-                Nenhum produto encontrado.
-            </div>
-        `;
-
+        document.getElementById('catalog').innerHTML = `<div style="text-align:center;padding:50px;color:var(--muted)">Nenhum produto encontrado.</div>`;
         return;
     }
 
     document.getElementById('catalog').innerHTML =
         Object.entries(grouped).map(([name, items]) => `
-
             <section class="cat-section">
-
                 <h2 class="cat-header">${name}</h2>
-
                 <div class="grid">
-
                     ${items.map(p => `
-
                         <div class="card">
-
-                            <img
-                                src="${p.image_url}"
-                                class="card-img"
-                                onclick="zoom('${p.image_url}')"
-                            >
-
+                            <img src="${p.image_url}" class="card-img" onclick="zoom('${p.image_url}')">
                             <div class="card-info">
-
-                                <div style="font-weight:600;margin-bottom:5px">
-                                    ${p.title}
-                                </div>
-
-                                <div class="card-price">
-                                    R$ ${Number(p.price).toFixed(2).replace('.', ',')}
-                                </div>
-
-                                <button
-                                    class="btn btn-primary"
-                                    onclick="addToCart('${p.id}')"
-                                    style="justify-content:center"
-                                >
-                                    🛒 Adicionar
-                                </button>
+                                <div style="font-weight:600;margin-bottom:5px">${p.title}</div>
+                                <div class="card-price">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</div>
+                                <button class="btn btn-primary" onclick="addToCart('${p.id}')" style="justify-content:center">🛒 Adicionar</button>
                             </div>
                         </div>
-
                     `).join('')}
                 </div>
             </section>
-
         `).join('');
 }
 
-function setCat(c){
-    activeCat = c;
-    render();
-}
-
+function setCat(c){ activeCat = c; render(); }
 function zoom(url){
     document.getElementById('zoomImg').src = url;
     document.getElementById('zoomModal').classList.add('active');
 }
-
-function toggleCart(){
-    document.getElementById('cartSide').classList.toggle('active');
-}
+function toggleCart(){ document.getElementById('cartSide').classList.toggle('active'); }
 
 function addToCart(id){
-
     const p = products.find(x => x.id == id);
-
     if(!p) return;
-
     const exists = cart.find(x => x.id == id);
-
-    if(exists){
-        exists.qty++;
-    } else {
-        cart.push({ ...p, qty:1 });
-    }
-
+    if(exists) exists.qty++;
+    else cart.push({ ...p, qty:1 });
     updateCartUI();
 }
 
 function updateCartUI(){
-
     localStorage.setItem('kn2_cart', JSON.stringify(cart));
-
-    document.getElementById('cartCount').textContent =
-        cart.reduce((a,b) => a + b.qty, 0);
-
+    document.getElementById('cartCount').textContent = cart.reduce((a,b) => a + b.qty, 0);
     let total = 0;
-
     document.getElementById('cartItems').innerHTML = cart.map(i => {
-
         total += i.price * i.qty;
-
-        return `
-            <div style="display:flex; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px">
-
-                <img
-                    src="${i.image_url}"
-                    style="width:40px; height:40px; border-radius:5px; object-fit:cover"
-                >
-
-                <div style="flex:1; font-size:13px">
-                    <strong>${i.title}</strong><br>
-                    ${i.qty}x R$ ${Number(i.price).toFixed(2)}
-                </div>
-
-                <button
-                    onclick="remCart('${i.id}')"
-                    style="background:none; border:none; color:var(--danger); cursor:pointer"
-                >
-                    ✕
-                </button>
-            </div>
-        `;
-
+        return `<div style="display:flex; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px">
+            <img src="${i.image_url}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
+            <div style="flex:1; font-size:13px"><strong>${i.title}</strong><br>${i.qty}x R$ ${Number(i.price).toFixed(2)}</div>
+            <button onclick="remCart('${i.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer">✕</button>
+        </div>`;
     }).join('');
-
-    document.getElementById('cartTotal').textContent =
-        `R$ ${total.toFixed(2).replace('.', ',')}`;
+    document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
 }
 
-function remCart(id){
-    cart = cart.filter(x => x.id != id);
-    updateCartUI();
-}
+function remCart(id){ cart = cart.filter(x => x.id != id); updateCartUI(); }
 
 function sendToWhatsApp(){
-
-    if(!cart.length){
-        return alert("Carrinho vazio!");
-    }
-
+    if(!cart.length) return alert("Carrinho vazio!");
     let msg = "Olá Kn2! Gostaria de encomendar:\n\n";
-
-    cart.forEach(i => {
-        msg += `• ${i.title} (${i.qty}x)\n`;
-    });
-
+    cart.forEach(i => { msg += `• ${i.title} (${i.qty}x)\n`; });
     msg += `\n*Total: ${document.getElementById('cartTotal').textContent}*`;
-
-    window.open(
-        `https://wa.me/5531999683959?text=${encodeURIComponent(msg)}`
-    );
+    window.open(`https://wa.me/5531999683959?text=${encodeURIComponent(msg)}`);
 }
 
 async function checkSession(){
-
     const { data:{ user } } = await _supabase.auth.getUser();
-
     if(user){
-
-        const { data:adm } = await _supabase
-            .from('perfil_admin')
-            .select('email')
-            .eq('email', user.email)
-            .single();
-
+        const { data:adm } = await _supabase.from('perfil_admin').select('email').eq('email', user.email).single();
         if(adm){
             document.getElementById('logoutBtn').style.display = 'block';
             return true;
         }
     }
-
     return false;
 }
 
 document.getElementById('adminBtn').onclick = async () => {
-
     if(await checkSession()){
-
         document.getElementById('adminModal').classList.add('active');
-
         renderAdmList();
-
     } else {
-
         document.getElementById('loginModal').classList.add('active');
     }
 };
 
 document.getElementById('loginBtn').onclick = async () => {
-
     const { error } = await _supabase.auth.signInWithPassword({
         email: document.getElementById('lEmail').value,
         password: document.getElementById('lPass').value
     });
-
-    if(error){
-        alert('Erro ao entrar');
-    } else {
-        location.reload();
-    }
+    if(error) alert('Erro ao entrar');
+    else location.reload();
 };
 
-document.getElementById('logoutBtn').onclick = async () => {
-    await _supabase.auth.signOut();
-    location.reload();
-};
+document.getElementById('logoutBtn').onclick = async () => { await _supabase.auth.signOut(); location.reload(); };
 
 function updateCatSelect(){
-
-    document.getElementById('pCat').innerHTML =
-        categories.map(c => `
-            <option value="${c}">${c}</option>
-        `).join('');
+    document.getElementById('pCat').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
 function newCat(){
-
     const n = prompt('Nova Categoria:');
-
     if(!n) return;
-
-    if(categories.includes(n)){
-        return alert('Categoria já existe');
-    }
-
+    if(categories.includes(n)) return alert('Categoria já existe');
     categories.push(n);
-
     updateCatSelect();
-
     document.getElementById('pCat').value = n;
 }
 
 async function delCat(){
-
     const current = document.getElementById('pCat').value;
-
     if(!current) return;
-
-    const confirmDelete = confirm(
-        `Excluir categoria "${current}"?`
-    );
-
-    if(!confirmDelete) return;
-
-    const { error } = await _supabase
-        .from('produtos')
-        .update({ category:'Sem Categoria' })
-        .eq('category', current);
-
-    if(error){
-        console.error(error);
-        return alert('Erro ao excluir categoria');
-    }
-
+    if(!confirm(`Excluir categoria "${current}"?`)) return;
+    const { error } = await _supabase.from('produtos').update({ category:'Sem Categoria' }).eq('category', current);
+    if(error) return alert('Erro ao excluir categoria');
     await loadData();
-
     alert('Categoria removida');
 }
 
 function renderAdmList(){
-
     const grouped = products.reduce((acc, p) => {
-
-        if(!acc[p.category]){
-            acc[p.category] = [];
-        }
-
+        if(!acc[p.category]) acc[p.category] = [];
         acc[p.category].push(p);
-
         return acc;
-
     }, {});
-
-    document.getElementById('adminListAgrupada').innerHTML =
-
-        Object.entries(grouped).map(([name, items]) => `
-
-            <div class="adm-cat-group">
-
-                <span class="adm-cat-label">
-                    ${name}
-                </span>
-
-                ${items.map(p => `
-
-                    <div class="adm-item">
-
-                        <img src="${p.image_url}">
-
-                        <span style="flex:1; font-size:13px">
-                            ${p.title}
-                        </span>
-
-                        <button
-                            class="btn btn-primary"
-                            onclick="edit('${p.id}')"
-                            style="padding:5px"
-                        >
-                            ✏️
-                        </button>
-
-                        <button
-                            class="btn btn-danger"
-                            onclick="del('${p.id}')"
-                            style="padding:5px"
-                        >
-                            🗑️
-                        </button>
-                    </div>
-
-                `).join('')}
-            </div>
-
-        `).join('');
+    document.getElementById('adminListAgrupada').innerHTML = Object.entries(grouped).map(([name, items]) => `
+        <div class="adm-cat-group"><span class="adm-cat-label">${name}</span>
+            ${items.map(p => `
+                <div class="adm-item">
+                    <img src="${p.image_url}">
+                    <span style="flex:1; font-size:13px">${p.title}</span>
+                    <button class="btn btn-primary" onclick="edit('${p.id}')" style="padding:5px">✏️</button>
+                    <button class="btn btn-danger" onclick="del('${p.id}')" style="padding:5px">🗑️</button>
+                </div>`).join('')}
+        </div>`).join('');
 }
 
 window.edit = (id) => {
-
     const p = products.find(x => x.id == id);
-
     if(!p) return;
-
     document.getElementById('editId').value = p.id;
     document.getElementById('pTitle').value = p.title;
     document.getElementById('pCat').value = p.category;
-    
-    // Formata o preço para a máscara ao editar
-    const formattedPrice = "R$ " + Number(p.price).toFixed(2).replace('.', ',');
-    document.getElementById('pPrice').value = formattedPrice;
-    
+    document.getElementById('pPrice').value = "R$ " + Number(p.price).toFixed(2).replace('.', ',');
     document.getElementById('pImg').value = p.image_url;
-
     document.getElementById('modalTitle').textContent = 'Editando Produto';
 };
 
@@ -1009,34 +790,26 @@ document.getElementById('saveBtn').onclick = async () => {
     const fileInput = document.getElementById('pImageFile');
     let imageUrl = document.getElementById('pImg').value;
 
-    // Início Feedback Visual
     btn.disabled = true;
-    btn.textContent = "Processando...";
+    btn.textContent = "Salvando...";
 
     try {
-        // Upload com Otimização
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const optimizedBlob = await compressImage(file);
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
+            const fileName = `${Date.now()}_prod.jpg`; 
             
             const { data, error: uploadError } = await _supabase.storage
-                .from('imagens')
-                .upload(`public/${fileName}`, optimizedBlob);
+                .from('imagens') 
+                .upload(fileName, optimizedBlob);
 
             if (uploadError) throw uploadError;
 
-            const { data: { publicUrl } } = _supabase.storage
-                .from('imagens')
-                .getPublicUrl(`public/${fileName}`);
-            
+            const { data: { publicUrl } } = _supabase.storage.from('imagens').getPublicUrl(fileName);
             imageUrl = publicUrl;
         }
 
-        // Converte preço da máscara para float
-        const rawPrice = document.getElementById('pPrice').value
-            .replace("R$ ", "").replace(".", "").replace(",", ".");
-
+        const rawPrice = document.getElementById('pPrice').value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
         const payload = {
             title: document.getElementById('pTitle').value,
             category: document.getElementById('pCat').value,
@@ -1045,39 +818,27 @@ document.getElementById('saveBtn').onclick = async () => {
         };
 
         let error;
-        if(id){
-            ({ error } = await _supabase.from('produtos').update(payload).eq('id', id));
-        } else {
-            ({ error } = await _supabase.from('produtos').insert([payload]));
-        }
+        if(id) ({ error } = await _supabase.from('produtos').update(payload).eq('id', id));
+        else ({ error } = await _supabase.from('produtos').insert([payload]));
 
         if(error) throw error;
-
         await loadData();
         renderAdmList();
         closeAdmin();
         alert('Sucesso!');
-
     } catch (err) {
-        console.error(err);
-        alert('Erro na operação: ' + (err.message || err));
+        alert('Erro: ' + err.message);
     } finally {
         btn.disabled = false;
         btn.textContent = "Salvar";
+        fileInput.value = "";
     }
 };
 
 window.del = async (id) => {
-
     if(!confirm('Excluir produto?')) return;
-
-    await _supabase
-        .from('produtos')
-        .delete()
-        .eq('id', id);
-
+    await _supabase.from('produtos').delete().eq('id', id);
     await loadData();
-
     renderAdmList();
 };
 
@@ -1091,33 +852,12 @@ function closeAdmin(){
     document.getElementById('modalTitle').textContent = 'Gerenciar';
 }
 
-document.getElementById('searchInput').oninput = (e) => {
-    query = e.target.value;
-    render();
-};
+document.getElementById('searchInput').oninput = (e) => { query = e.target.value; render(); };
 
-// REALTIME AUTOMÁTICO
-_supabase
-.channel('realtime-produtos')
-.on(
-    'postgres_changes',
-    {
-        event:'*',
-        schema:'public',
-        table:'produtos'
-    },
-    async () => {
-
-        console.log('Atualizando catálogo...');
-
-        await loadData();
-
-        if(document.getElementById('adminModal').classList.contains('active')){
-            renderAdmList();
-        }
-    }
-)
-.subscribe();
+_supabase.channel('realtime-produtos').on('postgres_changes', { event:'*', schema:'public', table:'produtos' }, async () => {
+    await loadData();
+    if(document.getElementById('adminModal').classList.contains('active')) renderAdmList();
+}).subscribe();
 
 init();
 
