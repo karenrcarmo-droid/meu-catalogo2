@@ -1050,35 +1050,4 @@ init();
 </script>
 </body>
 </html>
-```
-
-## UPLOAD LOCAL DE IMAGEM — CORRIGIDO
-
-Substitua o campo antigo de URL por este:
-
-```html
-<div class="f-group">
-    <label>Imagem Produto</label>
-
-    <input
-        type="file"
-        id="pFile"
-        accept="image/*"
-    >
-
-    <input type="hidden" id="pImg">
-
-    <img
-        id="previewImg"
-        style="
-            width:100%;
-            margin-top:10px;
-            border-radius:12px;
-            display:none;
-            max-height:250px;
-            object-fit:cover;
-        "
-    >
-</div>
-```
 
